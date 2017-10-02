@@ -1,0 +1,108 @@
+{
+    "env": {
+        "development:client": {
+            "presets": [
+                "react",
+                [
+                    "env",
+                    {
+                        "debug"      : true,
+                        "uglify"     : true,
+                        "useBuiltIns": false,
+                        "modules"    : false,
+                        "targets"    : {
+                            "browsers": "last 2 versions"
+                        }
+                    }
+                ],
+                "stage-2"
+            ],
+            "plugins": [
+                "transform-decorators-legacy",
+                [
+                    "react-transform",
+                    {
+                        "transforms": [{
+                            "transform": "react-transform-hmr",
+                            "imports"  : ["react"],
+                            "locals"   : ["module"]
+                        }, {
+                            "transform": "react-transform-catch-errors",
+                            "imports"  : [
+                                "react",
+                                "redbox-react"
+                            ]
+                        }]
+                    }
+                ],
+                "transform-flow-strip-types"
+            ]
+        },
+        "development:server": {
+            "presets": [
+                "react",
+                [
+                    "env",
+                    {
+                        "debug"      : true,
+                        "uglify"     : true,
+                        "useBuiltIns": false,
+                        "modules"    : false,
+                        "targets"    : {
+                            "node": "6.10.3"
+                        }
+                    }
+                ],
+                "stage-2"
+            ],
+            "plugins": [
+                "transform-decorators-legacy",
+                "transform-flow-strip-types"
+            ]
+        },
+        "production:client": {
+            "presets": [
+                "react",
+                [
+                    "env",
+                    {
+                        "debug"      : false,
+                        "uglify"     : true,
+                        "useBuiltIns": false,
+                        "modules"    : false,
+                        "targets"    : {
+                            "browsers": "last 2 versions"
+                        }
+                    }
+                ],
+                "stage-2"
+            ],
+            "plugins": [
+                "transform-decorators-legacy",
+                "transform-flow-strip-types"
+            ]
+        },
+        "production:server": {
+            "presets": [
+                "react",
+                [
+                    "env",
+                    {
+                        "debug"      : false,
+                        "uglify"     : false,
+                        "useBuiltIns": false,
+                        "modules"    : false,
+                        "targets"    : {
+                            "node": "6.10.3"
+                        }
+                    }
+                ],
+                "stage-2"
+            ],
+            "plugins": [
+                "transform-decorators-legacy",
+                "transform-flow-strip-types"
+            ]
+        }
+    }
+}

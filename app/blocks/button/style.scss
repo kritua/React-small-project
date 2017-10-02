@@ -1,0 +1,46 @@
+:local {
+
+    .button {
+        @include font-regular();
+        font-size: 16px;
+        line-height: 24px;
+        color: $clr-white;
+        white-space: nowrap;
+        text-decoration: none;
+        background: linear-gradient($clr-pink, 50%, darken($clr-pink, 2%) 50%);
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        outline: none;
+        border: none;
+        @include adaptive(tablet) {
+            font-size: 20px;
+        }
+        &--features {
+            background: linear-gradient($clr-red, 50%, darken($clr-red, 3%) 50%);
+        }
+        &--header {
+            padding: 10px 15px;
+        }
+        &--index {
+            flex-basis: 100%;
+            line-height: 70px;
+        }
+        &--submit {
+            display: block;
+            margin: 0 auto;
+        }
+        &:hover {
+            box-shadow: 0 0 0 1px $clr-white;
+        }
+        &:active {
+            color: transparentize($clr-white, 0.5);
+        }
+
+        &__wrapper {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    }
+}

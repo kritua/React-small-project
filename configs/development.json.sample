@@ -1,0 +1,13 @@
+{
+    "dev-server.host"   : "0.0.0.0",
+    "dev-server.port"   : 8080,
+    "dev-server.proxy"  : [{
+        "path"          : "/files",
+        "target"        : "https://pp-corp-api-ru.app-ses.com",
+        "changeOrigin"  : true,
+        "secure"        : false
+    }],
+
+    "server.host" : "localhost",
+    "server.port" : 4000,
+}

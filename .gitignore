@@ -1,0 +1,13 @@
+.idea/
+node_modules/
+dev_modules/
+public/*
+server/build/
+
+webpack-assets.json
+webpack-stats.json
+*.log
+.gitmodules
+.DS_Store
+configs/development.json
+.realsync

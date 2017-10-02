@@ -1,0 +1,21 @@
+[ignore]
+.*/__tests__/.*
+.*/node_modules/.*
+
+[include]
+flow-typed
+
+[libs]
+
+[options]
+module.file_ext=.js
+module.file_ext=.json
+module.file_ext=.pcss
+unsafe.enable_getters_and_setters=true
+module.name_mapper='^app' -> '<PROJECT_ROOT>/app'
+module.name_mapper='^block' -> '<PROJECT_ROOT>/app/blocks'
+module.name_mapper='^page' -> '<PROJECT_ROOT>/app/pages'
+module.name_mapper='^config' -> '<PROJECT_ROOT>/configs/config'
+
+[version]
+0.50.0
