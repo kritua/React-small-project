@@ -14,8 +14,8 @@ class Home extends Component {
             <main className={cx('home', 'home_index')}>
                 <section className={cx('page-headers page-headers--index')}>
                     <div className={cx('main-container')}>
-                        <button className={cx('slider slider--previous')} type='button' id='header-previous' />
-                        <button className={cx('slider slider--next')} type='button' id='header-next' />
+                        <button className={cx('slider slider--previous')} type="button" id="header-previous" />
+                        <button className={cx('slider slider--next')} type="button" id="header-next" />
                         <div className={cx('page-headers__wrapper')}>
                             <div className={cx('page-headers__headers')}>
                                 <h1 className={cx('page-headers__h1')}>Автосервис <br /><span>Asmoscow</span></h1>

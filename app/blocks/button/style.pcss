@@ -1,0 +1,35 @@
+:local {
+
+    .button {
+        @include font-regular();
+        font-size: 16px;
+        line-height: 24px;
+        color: $colorWhite;
+        white-space: nowrap;
+        text-decoration: none;
+        background: linear-gradient($colorSecond, 50%, darken($colorSecond, 2%) 50%);
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        outline: none;
+        border: none;
+
+        &:hover {
+            box-shadow: 0 0 0 1px $colorWhite;
+        }
+
+        &:active {
+            color: transparentize($colorWhite, 0.5);
+        }
+
+        &__wrapper {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        @include adaptive(tablet) {
+            font-size: 20px;
+        }
+    }
+}

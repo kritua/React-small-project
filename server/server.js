@@ -14,8 +14,8 @@ expressApp.use(cookieParser());
 expressApp.use(json());
 expressApp.use(render);
 
-expressApp.listen(process.env.PORT || 8080, () => {
-    console.info(`Listening on => ${process.env.PORT || 8080}`);
+expressApp.listen(process.env.PORT || 8082, () => {
+    console.info(`Listening on => ${process.env.PORT || 8082}`);
     if(__DEVELOPMENT__) {
         require('daemon-command-webpack-plugin/marker')()
     }

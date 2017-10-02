@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { PureComponent } from 'react'
 import classnames from 'classnames/bind'
+import { Link } from 'react-router-async'
 
 import style from './style'
 
@@ -18,10 +19,11 @@ class Button extends PureComponent {
     get elButton() {
         const props = {
             className: cx('button', this.props.className),
-            tagName  : ''
+            tagName  : '',
+            to       : ''
         };
 
-        return <button {...props} />
+        return <a {...props} />
     }
 
     render() {

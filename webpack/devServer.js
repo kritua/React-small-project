@@ -3,7 +3,7 @@ const config = require('./../configs/config');
 
 module.exports = {
     host        : config['dev-server.host'] || '0.0.0.0',
-    port        : config['dev-server.port'] || 8080,
+    port        : config['dev-server.port'] || 8082,
     contentBase : resolve(global.webpack.context, 'public'),
     proxy       : [
         ...config['dev-server.proxy'],
