@@ -6,7 +6,11 @@ module.exports = {
     port        : config['dev-server.port'] || 8082,
     contentBase : resolve(global.webpack.context, 'public'),
     proxy       : [
-        ...config['dev-server.proxy'],
+        {
+            path          : "/files",
+            changeOrigin  : true,
+            secure        : false
+        },
         {
             path    : [
                 '**',

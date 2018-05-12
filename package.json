@@ -37,7 +37,9 @@
     "hook-redux": "0.5.x",
     "hook-scroll": "1.0.2",
     "isomorphic-fetch": "^2.2.1",
+    "lodash.intersection": "^4.4.0",
     "name-all-modules-plugin": "1.0.1",
+    "node-fetch": "^2.1.2",
     "pretty-error": "2.1.1",
     "prop-types": "^15.5.10",
     "react": "15.6.1",
@@ -48,7 +50,8 @@
     "redux": "3.7.2",
     "redux-form": "^7.0.3",
     "redux-saga": "0.15.5",
-    "redux-thunk": "2.2.0"
+    "redux-thunk": "2.2.0",
+    "request": "^2.85.0"
   },
   "devDependencies": {
     "babel-core": "6.25.0",
