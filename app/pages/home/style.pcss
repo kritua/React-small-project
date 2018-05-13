@@ -1,24 +1,155 @@
 :local {
 
     .home {
-        padding: 40px;
-        max-width: 600px;
-        margin: 0 auto;
+        min-height: 100vh;
+        height: 100%;
+        color: #fff;
+        background: #1b2838;
 
-        &__input {
-            padding: 1px;
+        &__wrapper {
+            height: 100%;
+            width: 100%;
+            margin: 0 auto;
+
+            &_header {
+                display: flex;
+                align-items: center;
+            }
         }
 
-        &__pending {
+        &__header {
+            background: #171a21;
+            width: 100%;
+            padding: 20px 40px;
+            box-sizing: border-box;
+        }
+
+        &__heading {
+            margin-left: 50px;
+        }
+
+        &__form-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        &__form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        &__inputs {
+            flex-basis: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        &__label {
+            flex-basis: 45%;
+        }
+
+        &__input {
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        &__title {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        &__pending,
+        &__error {
             display: flex;
             align-items: center;
-            margin: 10px 0;
+            margin: 15px 0 0;
             background: #fff6da;
-            padding: 10px;
+            padding: 5px 10px;
+            flex-basis: 100%;
+            line-height: 40px;
+            height: 40px;
+            color: #585858;
+        }
+
+        &__error-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #ff4d00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            margin-right: 10px;
+            border-radius: 50%;
         }
 
         &__loader {
             margin-right: 10px;
+        }
+
+        &__button {
+            margin-top: 15px;
+        }
+
+        &__text {
+
+            &_nomargin {
+                margin: 0;
+            }
+
+            &_game {
+                margin: 7px 0;
+            }
+        }
+
+        &__gamelist {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        &__gamelist-block {
+            margin: 15px auto;
+            max-width: 1200px;
+        }
+
+        &__gamelist-header {
+            font-weight: 400;
+
+            span {
+                font-weight: 700;
+                color: #66c0f4;
+            }
+        }
+
+        &__game {
+            flex-basis: 24%;
+            padding: 10px 15px;
+            display: block;
+            box-sizing: border-box;
+            margin-bottom: 1%;
+            text-decoration: none;
+            color: inherit;
+            background: rgba(0, 0, 0, 0.2);
+            transition: 0.2s ease all;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        &__image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        &__no-games {
+            text-align: center;
         }
     }
 }

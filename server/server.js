@@ -45,7 +45,30 @@ router.get('/:user1/:user2', (req, res) => {
 
             const userGamesIntersection = await intersection(userGames[0], userGames[1]).sort((a, b) => a - b);
 
-            return userGamesIntersection;
+            const games = [];
+
+            await Promise.all(userGamesIntersection.map((gameId) => {
+                return fetch(`http://steamspy.com/api.php?request=appdetails&appid=${gameId}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        const multiplayerTag = data.tags.Multiplayer;
+
+                        if(multiplayerTag !== undefined) {
+                            const item = {
+                                name: data.name,
+                                id  : gameId
+                            };
+
+                            games.push(item);
+                        }
+                    });
+            }));
+
+            return {
+                user1,
+                user2,
+                games
+            };
         } catch(err) {
             console.error(err);
         }

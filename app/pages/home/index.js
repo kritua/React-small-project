@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import classnames from 'classnames/bind';
+import { gamesToStore } from './actions';
+import { connect } from 'react-redux';
 
 import Button from 'block/button';
 import Loader from 'block/loader';
@@ -8,22 +11,40 @@ import style from './style';
 
 const cx = classnames.bind(style);
 
+@connect((state) => {
+    if(state.gameList.payload) {
+        return {
+            games: state.gameList.payload.games,
+            user1: state.gameList.payload.user1,
+            user2: state.gameList.payload.user2
+        }
+    } else {
+        return {}
+    }
+})
 class Home extends Component {
 
     static displayName = '[page] home';
 
+    static contextTypes = {
+        store: PropTypes.object
+    };
+
+    static propTypes = {
+        games: PropTypes.array,
+        user1: PropTypes.string,
+        user2: PropTypes.string
+    };
+
     state = {
         value: {
-            user1: 'thiopentalum',
-            user2: 'Tryr'
+            user1: '',
+            user2: ''
         },
         error    : null,
         validForm: false,
         pending  : false,
-        valid    : {
-            user1: false,
-            user2: false
-        }
+        requested: false
     };
 
     onChange = (e) => {
@@ -36,48 +57,107 @@ class Home extends Component {
             value: {
                 ...this.state.value,
                 [name]: value
-            },
-            valid: {
-                ...this.state.valid,
-                [name]: e.target.validity.valid
             }
         }, () => {
-            this.setState({ validForm: Object.values(this.state.valid).every((item) => item) })
+            this.setState({ validForm: Object.values(this.state.value).every((item) => item) })
         });
     };
 
     onSubmit = (e) => {
         e && e.preventDefault();
 
-        // if(this.state.valid) {
+        const { validForm, pending } = this.state;
+
+        if(validForm && !pending) {
             this.fetchSteam();
-        // }
+        }
     };
 
     fetchSteam = async () => {
-        this.setState({ pending: true });
+        this.setState({
+            pending  : true,
+            requested: true
+        });
+
+        const { user1, user2 } = this.state.value;
 
         try {
-            const response = await fetch(`/steam/${this.state.value.user1}/${this.state.value.user2}`);
+            const response = await fetch(`/steam/${user1}/${user2}`);
             const data = await response.json();
 
+            await this.context.store.dispatch(gamesToStore(data));
             await this.setState({ pending: false });
-
-            console.log('ASYNC DATA', data);
-        } catch(err) {
-            console.error(err);
+        } catch(error) {
+            console.error(error);
+            this.setState({ error });
         }
     };
 
     get elButton() {
         const props = {
-            tagName : 'button',
-            type    : 'submit',
-            // disabled: !this.state.validForm,
-            children: 'Check games'
+            tagName  : 'button',
+            type     : 'submit',
+            className: cx('home__button'),
+            disabled : !this.state.validForm || this.state.pending,
+            children : 'Check games'
         };
 
         return <Button {...props} />
+    }
+
+    get elGameList() {
+        const { requested, pending } = this.state;
+        const { games, user1, user2 } = this.props;
+
+        if(requested && !pending) {
+            if(games.length && user1 && user2) {
+                return (
+                    <div className={cx('home__gamelist-block')}>
+                        <h3 className={cx('home__gamelist-header')}>Result for users: <span>{user1}</span> and <span>{user2}</span></h3>
+                        <div className={cx('home__gamelist')}>
+                            {games.map(({ name, id }, i) => (
+                                <a href={`https://store.steampowered.com/app/${id}`} key={i} className={cx('home__game')} target="_blank">
+                                    <p className={cx('home__text', 'home__text_game')}>{name}</p>
+                                    <img className={cx('home__image')} src={`https://steamcdn-a.akamaihd.net/steam/apps/${id}/header.jpg`} />
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )
+            } else {
+                return (
+                    <div className={cx('home__gamelist-block')}>
+                        <p className={cx('home__no-games')}>No multiplayer games intersection</p>
+                    </div>
+                )
+            }
+        }
+    }
+
+    get elPending() {
+        const { pending, error } = this.state;
+
+        if(pending && !error) {
+            return (
+                <div className={cx('home__pending')}>
+                    <Loader className={cx('home__loader')} />
+                    <p className={cx('home__text', 'home__text_nomargin')}>Data pending</p>
+                </div>
+            )
+        }
+    }
+
+    get elError() {
+        const { pending, error } = this.state;
+
+        if(!pending && error) {
+            return (
+                <div className={cx('home__error')}>
+                    <span className={cx('home__error-icon')}>!</span>
+                    <p className={cx('home__text', 'home__text_nomargin')}>{error}</p>
+                </div>
+            )
+        }
     }
 
     render() {
@@ -85,25 +165,36 @@ class Home extends Component {
 
         return (
             <div className={cx('home')}>
-                <h1 className={cx('home__header')}>Request Multiplayer games</h1>
-                <p className={cx('home__text')}>On this page you can check two players to have the same multiplayer games on Steam</p>
-                <p className={cx('home__text')}>https://steamcommunity.com/id/thiopentalum</p>
-                <p className={cx('home__text')}>https://steamcommunity.com/id/Tryr</p>
-                <form className={cx('home__form')} onSubmit={this.onSubmit}>
-                    <label className={cx('home__label')}>
-                        <input type="text" name="user1" className={cx('home__input')} onChange={this.onChange} value='https://steamcommunity.com/id/Tryr' />
-                    </label>
-                    <label className={cx('home__label')}>
-                        <input type="text" name="user2" className={cx('home__input')} onChange={this.onChange} value='https://steamcommunity.com/id/Ditrix789' />
-                    </label>
-                    {!this.state.pending && (
-                        <div className={cx('home__pending')}>
-                            <Loader className={cx('home__loader')} />
-                            <p className={cx('home__text')}>Data pending</p>
+                <div className={cx('home__wrapper')}>
+                    <div className={cx('home__header')}>
+                        <div className={cx('home__wrapper', 'home__wrapper_header')}>
+                            <img src="https://steamstore-a.akamaihd.net/public/shared/images/header/globalheader_logo.png?t=962016" className={cx('home__image')} />
+                            <h1 className={cx('home__heading')}>Steam API Service</h1>
                         </div>
-                    )}
-                    {this.elButton}
-                </form>
+                    </div>
+                    <div className={cx('home__form-wrapper')}>
+                        <h2 className={cx('home__form-heading')}>Request Multiplayer games</h2>
+                        <p className={cx('home__text')}>On this page you can check two players to have the same multiplayer games on Steam</p>
+                        <p className={cx('home__text')}>Test user 1: thiopentalum</p>
+                        <p className={cx('home__text')}>Test user 2: Tryr</p>
+                        <form className={cx('home__form')} onSubmit={this.onSubmit}>
+                            <div className={cx('home__inputs')}>
+                                <label className={cx('home__label')}>
+                                    <span className={cx('home__title')}>First player</span>
+                                    <input type="text" name="user1" className={cx('home__input')} onChange={this.onChange} value={this.state.value.user1} />
+                                </label>
+                                <label className={cx('home__label')}>
+                                    <span className={cx('home__title')}>Second player</span>
+                                    <input type="text" name="user2" className={cx('home__input')} onChange={this.onChange} value={this.state.value.user2} />
+                                </label>
+                            </div>
+                            {this.elPending}
+                            {this.elError}
+                            {this.elButton}
+                        </form>
+                    </div>
+                    {this.elGameList}
+                </div>
             </div>
         )
     }
