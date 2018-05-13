@@ -2,7 +2,7 @@ const { resolve } = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const common = [
-    require('./module.rules.sass'),
+    require('./module.rules.pcss'),
     require('./module.rules.img'),
     require('./module.rules.babel'),
     {

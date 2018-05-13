@@ -4843,6 +4843,10 @@ lodash.foreach@^4.3.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.foreach/-/lodash.foreach-4.5.0.tgz#1a6a35eace401280c7f06dddec35165ab27e3e53"
 
+lodash.intersection@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/lodash.intersection/-/lodash.intersection-4.4.0.tgz#0a11ba631d0e95c23c7f2f4cbb9a692ed178e705"
+
 lodash.isarguments@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz#2f573d85c6a24289ff00663b491c1d338ff3458a"
@@ -5243,6 +5247,10 @@ node-fetch@^1.0.1:
   dependencies:
     encoding "^0.1.11"
     is-stream "^1.0.1"
+
+node-fetch@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
 
 node-forge@0.6.33:
   version "0.6.33"
@@ -6475,6 +6483,10 @@ reduce-function-call@^1.0.1:
 redux-actions-helpers@1.x.x:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/redux-actions-helpers/-/redux-actions-helpers-1.0.2.tgz#6d9e1927cdf8d3184cded126a179a2b24d5a8934"
+
+redux-actions-helpers@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/redux-actions-helpers/-/redux-actions-helpers-1.0.4.tgz#7c1c15e90ad5d5014ebc1fe2018059ec04691bb0"
 
 redux-form@^7.0.3:
   version "7.0.4"

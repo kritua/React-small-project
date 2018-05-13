@@ -1,33 +1,58 @@
-import PropTypes from 'prop-types'
-import React, { PureComponent } from 'react'
-import classnames from 'classnames/bind'
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
+import classNames from 'classnames/bind';
 
-import style from './style'
+import { Link } from 'react-router-async';
 
-const cx = classnames.bind(style);
+import style from './style';
+
+const cx = classNames.bind(style);
 
 class Button extends PureComponent {
 
-    static displayName = '[block] button';
+    static displayName = '[component] button';
 
-    static propTypes = {
-        className: PropTypes.string,
-        tagName  : PropTypes.string
+    static defaultProps = {
+        disabled: false,
+        linkTo  : '#anchor'
     };
 
-    get elButton() {
-        const props = {
-            className: cx('button', this.props.className),
-            tagName  : ''
-        };
-
-        return <button {...props} />
-    }
+    static propTypes = {
+        disabled : PropTypes.bool,
+        className: PropTypes.string,
+        children : PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.node
+        ]).isRequired,
+        tagName   : PropTypes.string,
+        linkTo    : PropTypes.string,
+        type      : PropTypes.string,
+        onClick   : PropTypes.func,
+        target    : PropTypes.string,
+        attributes: PropTypes.object
+    };
 
     render() {
-        return this.elButton
+        let props = {
+            ...this.props.attributes,
+            onClick  : this.props.onClick,
+            className: cx('button', this.props.className),
+            children : this.props.children
+        };
+
+        if(typeof this.props.tagName === 'string') {
+            props.type = this.props.type;
+            props.disabled = this.props.disabled;
+
+            return <this.props.tagName {...props} />
+        } else {
+            props.to = this.props.linkTo;
+            props.target = this.props.target;
+
+            return <Link {...props} />
+        }
     }
 
 }
 
-export default Button
+export default Button;

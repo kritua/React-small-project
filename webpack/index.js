@@ -18,7 +18,6 @@ module.exports = (env = {}) => {
         entry           : require('./entry'),
         devtool         : require('./devtool'),
         target          : require('./target'),
-        externals       : require('./externals'),
         output          : require('./output'),
         module          : {
             rules : require('./module.rules')
