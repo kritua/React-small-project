@@ -25,12 +25,10 @@ router.get('/:user1/:user2', (req, res) => {
                 return fetch(url).then((response) => response.json()).then((data) => data.response.steamid)
             }));
 
-            const userGamesUrl = await response.map((userId) => {
-                return `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${steamApiKey}&steamid=${userId}&format=json`;
-            });
+            const userGames = await Promise.all(response.map((userId) => {
+                const userGamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${steamApiKey}&steamid=${userId}&format=json`;
 
-            const userGames = await Promise.all(userGamesUrl.map((url) => {
-                return fetch(url)
+                return fetch(userGamesUrl)
                     .then((response) => response.json())
                     .then((data) => {
                         const games = data.response.games;
