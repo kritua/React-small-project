@@ -89,7 +89,10 @@ class Home extends Component {
             await this.setState({ pending: false });
         } catch(error) {
             console.error(error);
-            this.setState({ error });
+            this.setState({
+                error,
+                pending: false
+            });
         }
     };
 
@@ -110,7 +113,7 @@ class Home extends Component {
         const { games, user1, user2 } = this.props;
 
         if(requested && !pending) {
-            if(games.length && user1 && user2) {
+            if(games && games.length && user1 && user2) {
                 return (
                     <div className={cx('home__gamelist-block')}>
                         <h3 className={cx('home__gamelist-header')}>Result for users: <span>{user1}</span> and <span>{user2}</span></h3>
@@ -154,15 +157,13 @@ class Home extends Component {
             return (
                 <div className={cx('home__error')}>
                     <span className={cx('home__error-icon')}>!</span>
-                    <p className={cx('home__text', 'home__text_nomargin')}>{error}</p>
+                    <p className={cx('home__text', 'home__text_nomargin')}>{error.message}</p>
                 </div>
             )
         }
     }
 
     render() {
-        console.log(this.state);
-
         return (
             <div className={cx('home')}>
                 <div className={cx('home__wrapper')}>
