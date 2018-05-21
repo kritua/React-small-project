@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames/bind';
-import { roomsToStore } from './actions';
+import { roomsToStore, roomsError } from './actions';
 import { connect } from 'react-redux';
 import fetch from 'node-fetch';
 
 import Loader from 'block/loader';
 import Search from 'block/icons/search';
+import Button from 'block/button';
 
 import style from './style';
 
 const cx = classnames.bind(style);
 
 @connect((state) => ({
-    rooms : state.roomList.payload,
+    rooms : state.roomList.rooms,
+    error : state.roomList.error,
     router: state.router
 }))
 class Home extends Component {
@@ -26,16 +28,28 @@ class Home extends Component {
     };
 
     static propTypes = {
-        rooms : PropTypes.array,
+        error: PropTypes.oneOfType([
+            PropTypes.object,
+            PropTypes.array,
+            PropTypes.string
+        ]),
+        rooms: PropTypes.oneOfType([
+            PropTypes.object,
+            PropTypes.array
+        ]),
         router: PropTypes.object
     };
 
-    state = {
-        value    : '',
-        error    : null,
-        validForm: false,
-        pending  : false
-    };
+    constructor() {
+        super(...arguments);
+
+        this.state = {
+            value    : this.props.router.location.query.room || '',
+            error    : null,
+            validForm: false,
+            pending  : false
+        }
+    }
 
     onChange = (e) => {
         e && e.preventDefault();
@@ -49,11 +63,11 @@ class Home extends Component {
         e && e.preventDefault();
 
         const currentPath = this.props.router.location.pathname;
-        const searchString = this.state.value;
-        const targetPath = `${currentPath}?room=${searchString}`;
+        const searchString = this.state.value ? `?room=${this.state.value}` : '';
+        const targetPath = `${currentPath}${searchString}`;
 
         console.log('SUBMIT')
-        this.context.router.push(targetPath);
+        this.context.router.push(targetPath, null, null, true);
     };
 
     // fetchSteam = async () => {
@@ -84,6 +98,7 @@ class Home extends Component {
         const { rooms } = this.props;
 
         if(!pending) {
+            console.log('ROOMS', rooms);
             if(rooms) {
                 return (
                     <div className={cx('home__roomlist-block')}>
@@ -94,7 +109,7 @@ class Home extends Component {
                             <p className={cx('home__roomheader-item', 'home__roomheader-item_stop')}>Запрет на покупки</p>
                         </div>
                         <div className={cx('home__roomlist')}>
-                            {rooms.length ? (
+                            {Array.isArray(rooms) && rooms.length ? (
                                 rooms.map(({ userId, id }, i) => {
                                     const isFree = Math.floor(Math.random() * rooms.length) > rooms.length / 2;
                                     const isChecked = Math.floor(Math.random() * rooms.length) > rooms.length / 2;
@@ -140,13 +155,14 @@ class Home extends Component {
     }
 
     get elError() {
-        const { pending, error } = this.state;
+        const { pending } = this.state;
+        const { error } = this.props;
 
-        if(!pending && error) {
+        if(!pending && error && error.length) {
             return (
                 <div className={cx('home__error')}>
                     <span className={cx('home__error-icon')}>!</span>
-                    <p className={cx('home__text', 'home__text_nomargin')}>{error.message}</p>
+                    <p className={cx('home__text', 'home__text_nomargin')}>{error}</p>
                 </div>
             )
         }
@@ -163,7 +179,13 @@ class Home extends Component {
                         <form className={cx('home__form')} onSubmit={this.onSubmit}>
                             <label className={cx('home__label')}>
                                 <Search className={cx('home__search')} />
-                                <input onChange={this.onChange} type="search" className={cx('home__input')} placeholder="Введите номер комнаты или имя гостя" />
+                                <input
+                                    value={this.state.value}
+                                    onChange={this.onChange}
+                                    type="search"
+                                    className={cx('home__input')}
+                                    placeholder="Введите номер комнаты или имя гостя"
+                                />
                             </label>
                         </form>
                         {this.elPending}
@@ -182,13 +204,21 @@ export default {
     action : () => Home,
     fetcher: [{
         promise: ({ location, helpers: { store: { dispatch } } }) => {
-            console.log('PARAMS', location.query.room);
             const filterParam = location.query.room;
             const reqestUrl = filterParam ? `https://jsonplaceholder.typicode.com/posts/${filterParam}` : 'https://jsonplaceholder.typicode.com/posts';
 
+            console.log('PARAMS', location.query.room, reqestUrl);
+
             return fetch(reqestUrl)
-                .then((result) => result.json())
+                .then((result) => {
+                    if(!result.ok) {
+                        throw new Error(`${result.status} ${result.statusText}`);
+                    }
+
+                    return result.json()
+                })
                 .then((data) => dispatch(roomsToStore(data)))
+                .catch((error) => dispatch(roomsError(error.message)))
         }
     }]
 }
