@@ -7,7 +7,6 @@ import fetch from 'node-fetch';
 
 import Loader from 'block/loader';
 import Search from 'block/icons/search';
-import Button from 'block/button';
 
 import style from './style';
 
@@ -56,7 +55,7 @@ class Home extends Component {
 
         const value = e.target.value;
 
-        this.setState({ value });
+        this.setState({ value }, this.onSubmit);
     };
 
     onSubmit = (e) => {
@@ -66,78 +65,49 @@ class Home extends Component {
         const searchString = this.state.value ? `?room=${this.state.value}` : '';
         const targetPath = `${currentPath}${searchString}`;
 
-        console.log('SUBMIT')
-        this.context.router.push(targetPath, null, null, true);
+        this.setState({ error: null });
+        this.context.router.push(targetPath);
     };
 
-    // fetchSteam = async () => {
-    //     this.setState({
-    //         pending  : true,
-    //         requested: true
-    //     });
-    //
-    //     const { user1, user2 } = this.state.value;
-    //
-    //     try {
-    //         const response = await fetch(`/steam/${user1}/${user2}`);
-    //         const data = await response.json();
-    //
-    //         await this.context.store.dispatch(roomsToStore(data));
-    //         await this.setState({ pending: false });
-    //     } catch(error) {
-    //         console.error(error);
-    //         this.setState({
-    //             error,
-    //             pending: false
-    //         });
-    //     }
-    // };
-
     get elRoomList() {
-        const { pending } = this.state;
+        const { pending, value } = this.state;
         const { rooms } = this.props;
 
         if(!pending) {
-            console.log('ROOMS', rooms);
-            if(rooms) {
-                return (
-                    <div className={cx('home__roomlist-block')}>
-                        <div className={cx('home__roomheader')}>
-                            <p className={cx('home__roomheader-item', 'home__roomheader-item_number')}>Номер</p>
-                            <p className={cx('home__roomheader-item', 'home__roomheader-item_status')}>Статус</p>
-                            <p className={cx('home__roomheader-item', 'home__roomheader-item_buy')}>Покупки</p>
-                            <p className={cx('home__roomheader-item', 'home__roomheader-item_stop')}>Запрет на покупки</p>
-                        </div>
-                        <div className={cx('home__roomlist')}>
-                            {Array.isArray(rooms) && rooms.length ? (
-                                rooms.map(({ userId, id }, i) => {
-                                    const isFree = Math.floor(Math.random() * rooms.length) > rooms.length / 2;
-                                    const isChecked = Math.floor(Math.random() * rooms.length) > rooms.length / 2;
-                                    const price = Math.floor(Math.random() * 100 + userId);
+            return (
+                <div className={cx('home__roomlist-block')}>
+                    <div className={cx('home__roomheader')}>
+                        <p className={cx('home__roomheader-item', 'home__roomheader-item_number')}>Номер</p>
+                        <p className={cx('home__roomheader-item', 'home__roomheader-item_status')}>Статус</p>
+                        <p className={cx('home__roomheader-item', 'home__roomheader-item_buy')}>Покупки</p>
+                        <p className={cx('home__roomheader-item', 'home__roomheader-item_stop')}>Запрет на покупки</p>
+                    </div>
+                    <div className={cx('home__roomlist')}>
+                        {Array.isArray(rooms) && rooms.length ? (
+                            rooms.map(({ id, price }, i) => {
+                                const isChecked = price > 52620;
+                                const isFree = price > 231111;
 
-                                    return (
-                                        <div key={i} className={cx('home__room')}>
-                                            <p className={cx('home__room-item', 'home__room-item_number')}>{id}</p>
-                                            <p className={cx('home__room-item', 'home__room-item_status', `home__room-item_status-${isFree}`)}>{isFree ? 'Свободен' : 'Занят'}</p>
-                                            <p className={cx('home__room-item', 'home__room-item_buy')}>{`${price} ₽`}</p>
-                                            <div className={cx('home__room-item', 'home__room-item_stop')}>
-                                                <input type="checkbox" defaultChecked={isChecked} />
-                                            </div>
+                                return (
+                                    <div key={i} className={cx('home__room')}>
+                                        <p className={cx('home__room-item', 'home__room-item_number')}>{id}</p>
+                                        <p className={cx('home__room-item', 'home__room-item_status', `home__room-item_status-${isFree}`)}>{isFree ? 'Свободен' : 'Занят'}</p>
+                                        <p className={cx('home__room-item', 'home__room-item_buy')}>{`${price} ₽`}</p>
+                                        <div className={cx('home__room-item', 'home__room-item_stop')}>
+                                            <input type="checkbox" defaultChecked={isChecked} />
                                         </div>
-                                    )
-                                })) : (
-                                <div className={cx('home__room')}>123</div>
-                            )}
-                        </div>
+                                    </div>
+                                )
+                            })
+                        ) : (
+                            <div className={cx('home__error')}>
+                                <span className={cx('home__error-icon')}>!</span>
+                                <p className={cx('home__text')}>{`Комната с номером ${value} не найдена`}</p>
+                            </div>
+                        )}
                     </div>
-                )
-            } else {
-                return (
-                    <div className={cx('home__roomlist-block')}>
-                        <p className={cx('home__no-rooms')}>Нет таких комнат</p>
-                    </div>
-                )
-            }
+                </div>
+            )
         }
     }
 
@@ -162,15 +132,13 @@ class Home extends Component {
             return (
                 <div className={cx('home__error')}>
                     <span className={cx('home__error-icon')}>!</span>
-                    <p className={cx('home__text', 'home__text_nomargin')}>{error}</p>
+                    <p className={cx('home__text')}>{error}</p>
                 </div>
             )
         }
     }
 
     render() {
-        console.log(this.state);
-
         return (
             <div className={cx('home')}>
                 <div className={cx('home__wrapper')}>
@@ -205,11 +173,8 @@ export default {
     fetcher: [{
         promise: ({ location, helpers: { store: { dispatch } } }) => {
             const filterParam = location.query.room;
-            const reqestUrl = filterParam ? `https://jsonplaceholder.typicode.com/posts/${filterParam}` : 'https://jsonplaceholder.typicode.com/posts';
 
-            console.log('PARAMS', location.query.room, reqestUrl);
-
-            return fetch(reqestUrl)
+            return fetch('http://localhost:3000/data')
                 .then((result) => {
                     if(!result.ok) {
                         throw new Error(`${result.status} ${result.statusText}`);
@@ -217,7 +182,15 @@ export default {
 
                     return result.json()
                 })
-                .then((data) => dispatch(roomsToStore(data)))
+                .then((data) => {
+                    if(filterParam) {
+                        const filtered = data.filter((item) => filterParam === item.id.toString() || item.guestname.indexOf(filterParam) !== -1);
+
+                        return dispatch(roomsToStore(filtered))
+                    }
+
+                    return dispatch(roomsToStore(data))
+                })
                 .catch((error) => dispatch(roomsError(error.message)))
         }
     }]

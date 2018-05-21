@@ -9,7 +9,6 @@ const initialState = {
 export default handleActions({
     [roomsToStore]: (state, action) => {
         return {
-            ...state,
             rooms: action.payload
         };
     },
