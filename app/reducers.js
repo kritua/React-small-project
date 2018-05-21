@@ -6,5 +6,5 @@ import homeReducer from 'pages/home/reducer';
 export default combineReducers({
     router,
     form    : formReducer,
-    gameList: homeReducer
+    roomList: homeReducer
 });
