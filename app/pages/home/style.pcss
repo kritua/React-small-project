@@ -1,9 +1,11 @@
 :local {
 
     .home {
-        min-height: 100vh;
-        height: 100%;
-        padding: 40px;
+        height: 100vh;
+        padding: 20px 0;
+        max-height: 100vh;
+        box-sizing: border-box;
+        overflow: hidden;
 
         &__wrapper {
             height: 100%;
@@ -23,7 +25,7 @@
 
         &__form-heading {
             font-weight: 300;
-            margin: 20px 0;
+            margin-bottom: 20px;
             text-align: center;
         }
 
@@ -46,6 +48,7 @@
             width: 100%;
             box-sizing: border-box;
             padding-left: 30px;
+            font-size: 16px;
         }
 
         &__search {
@@ -97,21 +100,19 @@
             margin-top: 15px;
         }
 
-        &__text {
-
-            &_nomargin {
-                margin: 0;
-            }
-
-            &_room {
-                margin: 7px 0;
-            }
-        }
-
         &__roomlist {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
+            overflow-y: scroll;
+            align-items: flex-start;
+        }
+
+        &__roomlist-wrapper {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
         &__roomlist-block {
@@ -210,10 +211,6 @@
         &__image {
             max-width: 100%;
             height: auto;
-        }
-
-        &__no-rooms {
-            text-align: center;
         }
     }
 }

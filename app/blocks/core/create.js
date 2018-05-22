@@ -18,7 +18,7 @@ function createStore(data) {
         const logger = createLogger({
             duration : true,
             collapsed: true,
-            diff     : true
+            diff     : false
         });
 
         middleware.push(logger);

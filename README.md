@@ -7,6 +7,13 @@ yarn && yarn development
 ## Client address
 
 ```
-localhost:8082
+localhost:8082/rooms
+```
+
+
+## API address
+
+```
+localhost:3000/data
 ```
 
