@@ -103,7 +103,7 @@ class Home extends Component {
         this.scroll = scrollPosition;
     };
 
-    onScrollThrottled = throttle(this.onScroll, 300);
+    onScrollThrottled = throttle(this.onScroll, 30);
 
     calculateSize = () => {
         const scrollHeight = this.$scrollContainer && (window.innerHeight - this.$scrollContainer.offsetTop);

@@ -34,8 +34,7 @@
                             ]
                         }]
                     }
-                ],
-                "transform-flow-strip-types"
+                ]
             ]
         },
         "development:server": {
@@ -56,8 +55,7 @@
                 "stage-2"
             ],
             "plugins": [
-                "transform-decorators-legacy",
-                "transform-flow-strip-types"
+                "transform-decorators-legacy"
             ]
         },
         "production:client": {
@@ -78,8 +76,7 @@
                 "stage-2"
             ],
             "plugins": [
-                "transform-decorators-legacy",
-                "transform-flow-strip-types"
+                "transform-decorators-legacy"
             ]
         },
         "production:server": {
@@ -100,8 +97,7 @@
                 "stage-2"
             ],
             "plugins": [
-                "transform-decorators-legacy",
-                "transform-flow-strip-types"
+                "transform-decorators-legacy"
             ]
         }
     }

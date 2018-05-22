@@ -2,7 +2,6 @@
     "parser": "babel-eslint",
     "extends": [
         "./eslint/base.js",
-        "./eslint/react.js",
-        "./eslint/flow.js"
+        "./eslint/react.js"
     ]
 }

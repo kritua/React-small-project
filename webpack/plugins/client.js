@@ -1,6 +1,5 @@
 const path                  = require('path');
 const webpack               = require('webpack');
-const AssetsPlugin          = require('webpack-assets-plugin');
 const CleanPlugin           = require('clean-webpack-plugin');
 const CompressionPlugin     = require("compression-webpack-plugin");
 const brotliCompress        = require('iltorb').compress;
@@ -9,7 +8,6 @@ const NameAllModulesPlugin  = require('name-all-modules-plugin');
 const common = require('./common');
 
 const base = [
-    new AssetsPlugin(),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en|ru/)
 ];
 
