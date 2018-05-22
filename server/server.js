@@ -3,10 +3,8 @@ import { json } from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import render from './render';
-import fetch from 'node-fetch';
 
 const expressApp = express();
-const router = express.Router();
 
 expressApp.disable('x-powered-by');
 
