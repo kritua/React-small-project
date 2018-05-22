@@ -1,9 +1,11 @@
 :local {
 
     .home {
-        min-height: 100vh;
-        height: 100%;
-        padding: 40px;
+        height: 100vh;
+        padding: 20px 0;
+        max-height: 100vh;
+        box-sizing: border-box;
+        overflow: hidden;
 
         &__wrapper {
             height: 100%;
@@ -23,7 +25,7 @@
 
         &__form-heading {
             font-weight: 300;
-            margin: 20px 0;
+            margin-bottom: 20px;
             text-align: center;
         }
 
@@ -102,6 +104,15 @@
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
+            overflow-y: scroll;
+            align-items: flex-start;
+        }
+
+        &__roomlist-wrapper {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
         &__roomlist-block {

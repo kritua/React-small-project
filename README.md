@@ -7,7 +7,7 @@ yarn && yarn development
 ## Client address
 
 ```
-localhost:8082
+localhost:8082/rooms
 ```
 
 

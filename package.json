@@ -38,7 +38,7 @@
     "hook-scroll": "1.0.2",
     "isomorphic-fetch": "^2.2.1",
     "json-server": "^0.12.2",
-    "lodash.intersection": "^4.4.0",
+    "lodash.throttle": "^4.1.1",
     "name-all-modules-plugin": "1.0.1",
     "node-fetch": "^2.1.2",
     "pretty-error": "2.1.1",

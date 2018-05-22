@@ -4,6 +4,7 @@ import classnames from 'classnames/bind';
 import { roomsToStore, roomsError } from './actions';
 import { connect } from 'react-redux';
 import fetch from 'node-fetch';
+import throttle from 'lodash.throttle';
 
 import Loader from 'block/loader';
 import Search from 'block/icons/search';
@@ -42,13 +43,77 @@ class Home extends Component {
     constructor() {
         super(...arguments);
 
+        this.elementsCount = 15;
+        this.totalElems = 15;
+        this.scroll = 0;
+        this.wrapperHeight = null;
+
         this.state = {
-            value    : this.props.router.location.query.room || '',
-            error    : null,
-            validForm: false,
-            pending  : false
+            value         : this.props.router.location.query.room || '',
+            error         : null,
+            validForm     : false,
+            pending       : false,
+            scrollHeight  : 0,
+            elemHeight    : 0,
+            renderElements: this.props.rooms.slice(0, this.elementsCount)
         }
     }
+
+    componentDidMount() {
+        this.$scrollContainer.addEventListener('scroll', this.onScrollThrottled);
+        setTimeout(this.calculateSize, 0);
+    }
+
+    componentWillUnmount() {
+        this.$scrollContainer.removeEventListener('scroll', this.onScrollThrottled);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.rooms) {
+            this.addMoreItems()
+        }
+    }
+
+    addMoreItems = (props = this.props) => {
+        this.setState({ renderElements: props.rooms.slice(0, this.totalElems) })
+    };
+
+    onScroll = (e) => {
+        const scrollPosition = e.target.scrollTop;
+        const containerHeight = this.$scrollContainer.offsetHeight;
+        const childNode = this.$scrollContainer.childNodes[0].offsetHeight;
+
+        if((scrollPosition > this.scroll) && (this.totalElems < this.props.rooms.length)) {
+            if(!this.wrapperHeight) {
+                this.wrapperHeight = containerHeight + 200; // предзагрузка контента при скролле на 200 пикселей раньше конца блока
+            } else if(!this.requestStep) {
+                this.requestStep = childNode - this.wrapperHeight;
+            } else if(!this.state.pending && (scrollPosition > this.requestStep)) {
+                this.requestStep = childNode - this.wrapperHeight;
+                if(this.totalElems + this.elementsCount >= this.props.rooms.length) {
+                    this.totalElems = this.props.rooms.length;
+                } else {
+                    this.totalElems += this.elementsCount;
+                }
+
+                this.addMoreItems();
+            }
+        }
+
+        this.scroll = scrollPosition;
+    };
+
+    onScrollThrottled = throttle(this.onScroll, 300);
+
+    calculateSize = () => {
+        const scrollHeight = this.$scrollContainer && (window.innerHeight - this.$scrollContainer.offsetTop);
+        const elemHeight = this.$elem && this.$elem.offsetHeight;
+
+        this.setState({
+            scrollHeight,
+            elemHeight
+        })
+    };
 
     onChange = (e) => {
         e && e.preventDefault();
@@ -70,7 +135,7 @@ class Home extends Component {
     };
 
     get elRoomList() {
-        const { pending, value } = this.state;
+        const { pending, value, renderElements } = this.state;
         const { rooms } = this.props;
 
         if(!pending) {
@@ -82,29 +147,31 @@ class Home extends Component {
                         <p className={cx('home__roomheader-item', 'home__roomheader-item_buy')}>Покупки</p>
                         <p className={cx('home__roomheader-item', 'home__roomheader-item_stop')}>Запрет на покупки</p>
                     </div>
-                    <div className={cx('home__roomlist')}>
-                        {Array.isArray(rooms) && rooms.length ? (
-                            rooms.map(({ id, price }, i) => {
-                                const isChecked = price > 52620;
-                                const isFree = price > 231111;
+                    <div className={cx('home__roomlist')} ref={(node) => { this.$scrollContainer = node }} style={{ height: this.state.scrollHeight }}>
+                        <div className={cx('home__roomlist-wrapper')}>
+                            {Array.isArray(rooms) && rooms.length ? (
+                                renderElements.map(({ id, price }, i) => {
+                                    const isChecked = price > 52620;
+                                    const isFree = price > 231111;
 
-                                return (
-                                    <div key={i} className={cx('home__room')}>
-                                        <p className={cx('home__room-item', 'home__room-item_number')}>{id}</p>
-                                        <p className={cx('home__room-item', 'home__room-item_status', `home__room-item_status-${isFree}`)}>{isFree ? 'Свободен' : 'Занят'}</p>
-                                        <p className={cx('home__room-item', 'home__room-item_buy')}>{`${price} ₽`}</p>
-                                        <div className={cx('home__room-item', 'home__room-item_stop')}>
-                                            <input type="checkbox" defaultChecked={isChecked} />
+                                    return (
+                                        <div key={i} className={cx('home__room')} ref={(node) => { this.$elem = node }}>
+                                            <p className={cx('home__room-item', 'home__room-item_number')}>{id}</p>
+                                            <p className={cx('home__room-item', 'home__room-item_status', `home__room-item_status-${isFree}`)}>{isFree ? 'Свободен' : 'Занят'}</p>
+                                            <p className={cx('home__room-item', 'home__room-item_buy')}>{`${price} ₽`}</p>
+                                            <div className={cx('home__room-item', 'home__room-item_stop')}>
+                                                <input type="checkbox" defaultChecked={isChecked} />
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            })
-                        ) : (
-                            <div className={cx('home__error')}>
-                                <span className={cx('home__error-icon')}>!</span>
-                                <p className={cx('home__text')}>{`Комната с номером ${value} не найдена`}</p>
-                            </div>
-                        )}
+                                    )
+                                })
+                            ) : (
+                                <div className={cx('home__error')}>
+                                    <span className={cx('home__error-icon')}>!</span>
+                                    <p className={cx('home__text')}>{`Комната с номером или именем гостя ${value} не найдена`}</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )
@@ -128,7 +195,7 @@ class Home extends Component {
         const { pending } = this.state;
         const { error } = this.props;
 
-        if(!pending && error && error.length) {
+        if(!pending && error) {
             return (
                 <div className={cx('home__error')}>
                     <span className={cx('home__error-icon')}>!</span>
