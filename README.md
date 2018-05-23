@@ -1,7 +1,7 @@
 ## Install and start
 
 ```
-yarn && yarn development
+npm i && npm run development
 ```
 
 ## Client address
