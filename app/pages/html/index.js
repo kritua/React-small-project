@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component, createFactory } from 'react';
-import config from 'config';
+import config from '../../../configs/config';
 
 class Html extends Component {
 
