@@ -68,14 +68,23 @@ router.get('/:user1/:user2', (req, res) => {
                 games
             };
         } catch(err) {
-            console.error(err);
+            return err
         }
     };
 
-    requestId().then((data) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.send(data);
-    });
+    requestId()
+        .then((data) => {
+            if(data.message) {
+                res.setHeader('Content-Type', 'plain/text');
+                res.status(500).send({
+                    message: data.message,
+                    code   : 500
+                });
+            } else {
+                res.setHeader('Content-Type', 'application/json');
+                res.send(data);
+            }
+        })
 });
 
 expressApp.use('/steam', router);

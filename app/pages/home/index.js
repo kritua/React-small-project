@@ -12,11 +12,11 @@ import style from './style';
 const cx = classnames.bind(style);
 
 @connect((state) => {
-    if(state.gameList.payload) {
+    if(state.gameList) {
         return {
-            games: state.gameList.payload.games,
-            user1: state.gameList.payload.user1,
-            user2: state.gameList.payload.user2
+            games: state.gameList.games,
+            user1: state.gameList.user1,
+            user2: state.gameList.user2
         }
     } else {
         return {}
@@ -73,6 +73,12 @@ class Home extends Component {
         }
     };
 
+    errHandler = (data) => {
+        if(data.code === 500) {
+            throw new Error('These two users has too many intersections');
+        }
+    };
+
     fetchSteam = async () => {
         this.setState({
             pending  : true,
@@ -85,10 +91,10 @@ class Home extends Component {
             const response = await fetch(`/steam/${user1}/${user2}`);
             const data = await response.json();
 
+            await this.errHandler(data);
             await this.context.store.dispatch(gamesToStore(data));
             await this.setState({ pending: false });
         } catch(error) {
-            console.error(error);
             this.setState({
                 error,
                 pending: false
@@ -164,6 +170,7 @@ class Home extends Component {
     }
 
     render() {
+        console.log(this.state)
         return (
             <div className={cx('home')}>
                 <div className={cx('home__wrapper')}>

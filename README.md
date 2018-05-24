@@ -9,5 +9,3 @@ yarn && yarn development
 ```
 localhost:8082
 ```
-
-### If no webpack-assets.json found, restart the project again
