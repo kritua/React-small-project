@@ -3,7 +3,7 @@ import { json } from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import render from './render';
-import fetch from 'node-fetch';
+import fetch from 'isomorphic-fetch';
 import intersection from 'lodash.intersection';
 
 const expressApp = express();
@@ -41,26 +41,26 @@ router.get('/:user1/:user2', (req, res) => {
                     })
             }));
 
-            const userGamesIntersection = await intersection(userGames[0], userGames[1]).sort((a, b) => a - b);
+            const games = await intersection(userGames[0], userGames[1]).sort((a, b) => a - b);
 
-            const games = [];
+            // const games = [];
 
-            await Promise.all(userGamesIntersection.map((gameId) => {
-                return fetch(`http://steamspy.com/api.php?request=appdetails&appid=${gameId}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        const multiplayerTag = data.tags.Multiplayer;
-
-                        if(multiplayerTag !== undefined) {
-                            const item = {
-                                name: data.name,
-                                id  : gameId
-                            };
-
-                            games.push(item);
-                        }
-                    });
-            }));
+            // await Promise.all(userGamesIntersection.map((gameId) => {
+            //     return fetch(`http://steamspy.com/api.php?request=appdetails&appid=${gameId}`)
+            //         .then((response) => response.json())
+            //         .then((data) => {
+            //             const multiplayerTag = data.tags.Multiplayer;
+            //
+            //             if(multiplayerTag !== undefined) {
+            //                 const item = {
+            //                     name: data.name,
+            //                     id  : gameId
+            //                 };
+            //
+            //                 games.push(item);
+            //             }
+            //         });
+            // }));
 
             return {
                 user1,
@@ -88,6 +88,47 @@ router.get('/:user1/:user2', (req, res) => {
 });
 
 expressApp.use('/steam', router);
+
+router.get('/:gameId', (req, res) => {
+    const gameId = req.params.gameId;
+
+    const getMultiplayer = async () => {
+        try {
+            return await fetch(`http://steamspy.com/api.php?request=appdetails&appid=${gameId}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    const multiplayerTag = data.tags.Multiplayer;
+
+                    console.log('MULTIPLAYER YESYYEYEYEYEYE', multiplayerTag)
+
+                    if(multiplayerTag !== undefined) {
+                        return {
+                            name: data.name,
+                            id  : gameId
+                        };
+                    } else {
+                        return
+                    }
+                });
+        } catch(err) {
+            return err
+        }
+    };
+
+    getMultiplayer()
+        .then((data) => {
+            console.log('DATA', data, !!data)
+            if(data) {
+                res.setHeader('Content-Type', 'application/json');
+                res.send(data);
+            } else {
+                res.setHeader('Content-Type', 'text/plain');
+                res.send(new Error('Empty'));
+            }
+        })
+});
+
+expressApp.use('/multiplayer', router);
 
 // Express Middleware
 expressApp.use(compression());

@@ -1,10 +1,10 @@
 :local {
 
     .home {
-        min-height: 100vh;
-        height: 100%;
+        height: 100vh;
         color: #fff;
         background: #1b2838;
+        overflow: hidden;
 
         &__wrapper {
             height: 100%;
@@ -26,17 +26,22 @@
 
         &__heading {
             margin-left: 50px;
+            font-weight: 300;
         }
 
         &__form-wrapper {
             max-width: 600px;
-            margin: 0 auto;
+            margin: 15px auto;
         }
 
         &__form {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+        }
+
+        &__form-heading {
+            margin: 15px 0;
         }
 
         &__inputs {
@@ -66,12 +71,25 @@
         &__error {
             display: flex;
             align-items: center;
-            margin: 15px 0 0;
+            margin: 15px auto 0;
             background: #fff6da;
             padding: 5px 10px;
             flex-basis: 100%;
             height: 40px;
             color: #585858;
+            max-width: 600px;
+        }
+
+        &__pending-wrapper {
+            flex-basis: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        &__pending {
+            background: none;
+            color: #fff;
+            justify-content: center;
         }
 
         &__error-icon {
@@ -97,6 +115,7 @@
         }
 
         &__text {
+            margin: 15px 0;
 
             &_nomargin {
                 margin: 0;
@@ -108,9 +127,14 @@
         }
 
         &__gamelist {
+            overflow-y: scroll;
+        }
+
+        &__gamelist-wrapper {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
+            padding-bottom: 30px;
         }
 
         &__gamelist-block {
@@ -120,6 +144,7 @@
 
         &__gamelist-header {
             font-weight: 400;
+            margin: 15px 0;
 
             span {
                 font-weight: 700;
