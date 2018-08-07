@@ -4,6 +4,7 @@ import classnames from 'classnames/bind';
 import { gamesToStore } from './actions';
 import { connect } from 'react-redux';
 import throttle from 'lodash.throttle';
+import { Transition, TransitionGroup } from 'react-transition-group';
 
 import Button from 'block/button';
 import Loader from 'block/loader';
@@ -53,9 +54,11 @@ class Home extends Component {
             elemHeight    : 0,
             renderElements: [],
             requested     : false,
+            focused       : '',
             value         : {
                 user1: 'thiopentalum',
-                user2: 'Tryr'
+                user2: 'Tryr',
+                user3: 'Borodach'
             }
         }
     }
@@ -325,9 +328,65 @@ class Home extends Component {
         }
     }
 
-    render() {
-        console.log(this.state);
+    get elInputs() {
+        const items = [
+            {
+                name : 'user1',
+                value: this.state.value.user1
+            },
+            {
+                name : 'user2',
+                value: this.state.value.user2
+            },
+            {
+                name : 'user3',
+                value: this.state.value.user3
+            }
+        ];
 
+        return (
+            <div className={cx('home__inputs')}>
+                {items.map((item, index) => {
+                    const isFocused = !this.state.focused || this.state.focused === item.name;
+                    const className = cx('home__label', {
+                        ['home__label_focused']    : this.state.focused === item.name,
+                        ['home__label_not-focused']: this.state.focused && this.state.focused !== item.name
+                    });
+                    const props = {
+                        in           : isFocused,
+                        unmountOnExit: true,
+                        mountOnEnter : true,
+                        timeout      : {
+                            enter: 300,
+                            exit : 200
+                        }
+                    };
+
+                    return (
+                        <Transition {...props} key={`user-${index}`}>
+                            <label className={className} onFocus={this.onFocus} onBlur={this.onBlur}>
+                                <span className={cx('home__title')}>First player</span>
+                                <input type="text" name={item.name} className={cx('home__input')} onChange={this.onChange} value={item.value} />
+                            </label>
+                        </Transition>
+                    )
+                })}
+            </div>
+        )
+    }
+
+    onFocus = (e) => {
+        this.setState({
+            focused: e.target.name
+        })
+    };
+
+    onBlur = () => {
+        this.setState({ focused: '' })
+    };
+
+    render() {
+        console.log(this.state.focused)
         return (
             <div className={cx('home')}>
                 <div className={cx('home__wrapper')}>
@@ -344,16 +403,7 @@ class Home extends Component {
                             <strong> Tryr</strong>
                         </p>
                         <form className={cx('home__form')} onSubmit={this.onSubmit}>
-                            <div className={cx('home__inputs')}>
-                                <label className={cx('home__label')}>
-                                    <span className={cx('home__title')}>First player</span>
-                                    <input type="text" name="user1" className={cx('home__input')} onChange={this.onChange} value={this.state.value.user1} />
-                                </label>
-                                <label className={cx('home__label')}>
-                                    <span className={cx('home__title')}>Second player</span>
-                                    <input type="text" name="user2" className={cx('home__input')} onChange={this.onChange} value={this.state.value.user2} />
-                                </label>
-                            </div>
+                            {this.elInputs}
                             {this.elError}
                             {this.elButton}
                         </form>

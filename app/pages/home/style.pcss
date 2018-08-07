@@ -51,7 +51,16 @@
         }
 
         &__label {
-            flex-basis: 45%;
+            width: 30%;
+            transition: all 200ms;
+
+            &_focused {
+                flex-grow: 1;
+            }
+
+            &_not-focused {
+                flex-shrink: 1;
+            }
         }
 
         &__input {
