@@ -1,10 +1,7 @@
-module.exports = {
+{
     "parserOptions": {
         "ecmaVersion": 6,
-        "sourceType": "module",
-        "ecmaFeatures": {
-            "experimentalObjectRestSpread": true
-        }
+        "sourceType": "module"
     },
     "rules": {
         "no-compare-neg-zero": "off",
@@ -249,6 +246,12 @@ module.exports = {
         "require-yield": "error",
         "rest-spread-spacing": ["error", "never"],
         "template-curly-spacing": "error",
-        "yield-star-spacing": ["warn", "before"]
+        "yield-star-spacing": ["warn", "before"],
+        "no-console": ["error", {
+            "allow": [
+                "info",
+                "error"
+            ]
+        }]
     }
-};
+}

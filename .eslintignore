@@ -3,6 +3,7 @@ public/
 webpack/
 node_modules/
 server/build/
+server/
 configs/
 set-of-objects/
 router-async/
@@ -12,4 +13,3 @@ redux-actions-helpers-saga/
 hook-fetcher/
 hook-redux/
 desktop/
-__tests__/

@@ -1,18 +1,13 @@
 const { resolve } = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const browsers = [
     'Chrome >= 50',
     'Firefox >= 50',
-    'Explorer >= 10',
-    'Edge >= 12',
-    'iOS >= 8',
-    'Safari >= 8',
-    'ExplorerMobile >= 10',
     'Opera >= 40'
 ];
 
 const use = [{
-    loader : 'style'
+    loader: global.webpack.development ? 'style' : MiniCssExtractPlugin.loader
 }, {
     loader : global.webpack.client ? 'css' : 'css/locals',
     options: {
@@ -41,11 +36,6 @@ const use = [{
                     '::-webkit-media-controls-start-playback-button'
                 ]
             }),
-            require('stylehacks')({
-                browsers,
-                lint     : true,
-                sourcemap: true
-            }),
             require('stylelint')({
                 ignoreFiles: resolve(global.webpack.context, 'blocks/bootstrap/**/*.css'),
                 configBasedir: global.webpack.context
@@ -56,16 +46,11 @@ const use = [{
     }
 }];
 
-if(global.webpack.server || global.webpack.production) {
+if(global.webpack.server) {
     delete use.shift();
 }
 
 module.exports = {
-    test    : /\.pcss$/,
-    use     : ExtractTextPlugin.extract({ use }),
-    include : [
-        resolve(global.webpack.context, 'app'),
-        resolve(global.webpack.context, 'dev_modules'),
-        resolve(global.webpack.context, 'node_modules')
-    ]
+    test: /\.pcss$/,
+    use: use,
 };

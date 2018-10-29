@@ -20,24 +20,24 @@ class Html extends Component {
         })
     };
 
-    get style() {
+    style = () => {
         if(process.env.NODE_ENV === 'production') {
             return <link rel="stylesheet" href={this.props.assets.styles.main} />
         }
-    }
+    };
 
-    get runtime() {
+    runtime = () => {
         // TODO: inline in html
         if(process.env.NODE_ENV === 'production') {
             return <script src={this.props.assets.javascript.runtime} defer={true} />
         }
-    }
+    };
 
-    get vendors() {
+    vendors = () => {
         if(process.env.NODE_ENV === 'production') {
             return <script src={this.props.assets.javascript.vendors} defer={true} />
         }
-    }
+    };
 
     render() {
         const attrs = this.props.helmet.htmlAttributes.toComponent();
@@ -56,13 +56,13 @@ class Html extends Component {
                     {this.props.helmet.title.toComponent()}
                     {this.props.helmet.meta.toComponent()}
                     <script dangerouslySetInnerHTML={{ __html: `window.__config=${JSON.stringify(config)}` }} />
-                    {this.style}
+                    {this.style()}
                 </head>
                 <body>
                     <div id="app" dangerouslySetInnerHTML={app} />
                     <script id="__data" dangerouslySetInnerHTML={script} />
-                    {this.runtime}
-                    {this.vendors}
+                    {this.runtime()}
+                    {this.vendors()}
                     <script src={this.props.assets.javascript.main} defer={true} />
                 </body>
             </html>

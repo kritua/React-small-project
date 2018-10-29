@@ -13,7 +13,10 @@ module.exports = (env = {}) => {
         server      : !!env.server
     };
 
+    console.log(require('./target'))
+
     const config = {
+        mode            : global.webpack.env,
         context         : global.webpack.context,
         entry           : require('./entry'),
         devtool         : require('./devtool'),
@@ -27,7 +30,11 @@ module.exports = (env = {}) => {
         plugins         : require(`./plugins/${global.webpack.type}`),
         performance     : require('./performance'),
         bail            : global.webpack.production,
-        profile         : global.webpack.production
+        profile         : global.webpack.production,
+        node            : {
+            fs: 'empty',
+            net: 'empty'
+        }
     };
 
     if(global.webpack.development) {

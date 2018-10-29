@@ -4,7 +4,7 @@ import classnames from 'classnames/bind';
 import { gamesToStore } from './actions';
 import { connect } from 'react-redux';
 import throttle from 'lodash.throttle';
-import { Transition, TransitionGroup } from 'react-transition-group';
+import { Transition } from 'react-transition-group';
 
 import Button from 'block/button';
 import Loader from 'block/loader';
@@ -207,15 +207,12 @@ class Home extends Component {
             });
 
             this.requestCount++;
-
-            console.log(this.requestCount)
         } catch(error) {
             console.error(error)
         }
     };
 
     getMultiplayerGames = (game) => {
-        console.log('DATA SENDING')
         this.setState({ pending: true });
 
         return fetch(`/multiplayer/${game}`)
@@ -257,7 +254,7 @@ class Home extends Component {
         }
     };
 
-    get elButton() {
+    renderElButton() {
         const props = {
             tagName  : 'button',
             type     : 'submit',
@@ -269,7 +266,7 @@ class Home extends Component {
         return <Button {...props} />
     }
 
-    get elGameList() {
+    renderElGameList() {
         const { requested, pending, renderElements, scrollHeight } = this.state;
         const { games, user1, user2 } = this.props;
 
@@ -283,7 +280,7 @@ class Home extends Component {
                 <div className={cx('home__gamelist')} style={{ height: scrollHeight }} ref={(node) => { this.$scrollContainer = node }}>
                     <div className={cx('home__gamelist-wrapper')}>
                         {showElements && renderElements.map(({ name, id }, i) => (
-                            <a ref={(node) => { this.$elem = node }} href={`https://store.steampowered.com/app/${id}`} key={i} className={cx('home__game')} target="_blank">
+                            <a ref={(node) => { this.$elem = node }} href={`https://store.steampowered.com/app/${id}`} key={i} className={cx('home__game')} target="_blank" rel="noopener noreferrer">
                                 <p className={cx('home__text', 'home__text_game')}>{name}</p>
                                 <img className={cx('home__image')} src={`https://steamcdn-a.akamaihd.net/steam/apps/${id}/header.jpg`} />
                             </a>
@@ -293,14 +290,14 @@ class Home extends Component {
                                 <p className={cx('home__no-games')}>No multiplayer games intersection</p>
                             </div>
                         )}
-                        {this.elPending}
+                        {this.renderElPending()}
                     </div>
                 </div>
             </div>
         )
     }
 
-    get elPending() {
+    renderElPending() {
         const { pending, error } = this.state;
 
         if(pending && !error) {
@@ -315,7 +312,7 @@ class Home extends Component {
         }
     }
 
-    get elError() {
+    renderElError() {
         const { pending, error } = this.state;
 
         if(!pending && error) {
@@ -328,7 +325,7 @@ class Home extends Component {
         }
     }
 
-    get elInputs() {
+    renderElInputs() {
         const items = [
             {
                 name : 'user1',
@@ -337,10 +334,6 @@ class Home extends Component {
             {
                 name : 'user2',
                 value: this.state.value.user2
-            },
-            {
-                name : 'user3',
-                value: this.state.value.user3
             }
         ];
 
@@ -386,7 +379,6 @@ class Home extends Component {
     };
 
     render() {
-        console.log(this.state.focused)
         return (
             <div className={cx('home')}>
                 <div className={cx('home__wrapper')}>
@@ -403,12 +395,12 @@ class Home extends Component {
                             <strong> Tryr</strong>
                         </p>
                         <form className={cx('home__form')} onSubmit={this.onSubmit}>
-                            {this.elInputs}
-                            {this.elError}
-                            {this.elButton}
+                            {this.renderElInputs()}
+                            {this.renderElError()}
+                            {this.renderElButton()}
                         </form>
                     </div>
-                    {this.elGameList}
+                    {this.renderElGameList()}
                 </div>
             </div>
         )

@@ -1,4 +1,4 @@
-module.exports = {
+{
     "parserOptions": {
         "ecmaFeatures": {
             "jsx": true
@@ -59,12 +59,6 @@ module.exports = {
             "component": true,
             "html": true
         }],
-        "react/sort-comp": ["off", {
-            "order": [
-                "/^\w+$/",
-                "render"
-            ]
-        }],
         "react/sort-prop-types": "off",
         "react/style-prop-object": "error",
         "react/void-dom-elements-no-children": "error",
@@ -107,4 +101,4 @@ module.exports = {
         "react/jsx-uses-vars": "warn",
         "react/jsx-wrap-multilines": "warn"
     }
-};
+}
