@@ -76,4 +76,4 @@ export default async function(req, res) {
         console.error(pretty.render(error));
         res.status(500).send('Internal error');
     }
-};
+}

@@ -1,7 +1,6 @@
-// @flow
 import React from 'react';
 
-const Forbidden = (): React$Element<*> => (
+const Forbidden = () => (
     <div>403</div>
 );
 
