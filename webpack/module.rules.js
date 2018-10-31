@@ -1,12 +1,11 @@
 const { resolve } = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const common = [
+module.exports = [
     require('./module.rules.pcss'),
     require('./module.rules.img'),
     require('./module.rules.babel'),
     {
-        enforce : 'pre',
         test    : /\.jsx?$/,
         exclude : [
             resolve(global.webpack.context, 'bin'),
@@ -19,11 +18,7 @@ const common = [
         use: [{
             loader  : 'eslint',
             options : {
-                // failOnWarning: global.webpack.production,
-                // failOnError  : global.webpack.production,
-                // emitError    : global.webpack.production,
-                // emitWarning  : global.webpack.production,
-                cache        : global.webpack.development
+                cache: global.webpack.development
             }
         }]
     }, {
@@ -57,41 +52,6 @@ const common = [
         }]
     }, {
         test    : /\.css$/,
-        include : [
-            resolve(global.webpack.context, 'app', 'blocks', 'bootstrap'),
-        ],
-        use: ExtractTextPlugin.extract([/*{
-            loader : 'style'
-        }, */{
-            loader : 'css/locals',
-            options: {
-                context         : global.webpack.context,
-                modules         : true,
-                sourceMap       : global.webpack.development,
-                minimize        : global.webpack.production,
-                localIdentName  : global.webpack.production ? '[hash:hex]' : '[local]'
-            }
-        }])
+        use: MiniCssExtractPlugin.loader
     }
 ];
-
-const config = {
-    client : {
-        development : [
-            ...common
-        ],
-        production  : [
-            ...common
-        ]
-    },
-    server : {
-        development : [
-            ...common
-        ],
-        production  : [
-            ...common
-        ]
-    }
-};
-
-module.exports = config[global.webpack.type][global.webpack.env];

@@ -1,7 +1,7 @@
 {
     "parser": "babel-eslint",
     "extends": [
-        "./eslint/base.js",
-        "./eslint/react.js"
+        "./eslint/base.json",
+        "./eslint/react.json"
     ]
 }

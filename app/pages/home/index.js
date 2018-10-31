@@ -1,21 +1,22 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames/bind';
-import { roomsToStore, roomsError } from './actions';
+import { gamesToStore } from './actions';
 import { connect } from 'react-redux';
-import fetch from 'node-fetch';
 import throttle from 'lodash.throttle';
+import { Transition } from 'react-transition-group';
 
+import Button from 'block/button';
 import Loader from 'block/loader';
-import Search from 'block/icons/search';
 
 import style from './style';
 
 const cx = classnames.bind(style);
 
 @connect((state) => ({
-    rooms : state.roomList.rooms,
-    error : state.roomList.error,
+    games : state.gameList && state.gameList.games,
+    user1 : state.gameList && state.gameList.user1,
+    user2 : state.gameList && state.gameList.user2,
     router: state.router
 }))
 class Home extends Component {
@@ -28,54 +29,66 @@ class Home extends Component {
     };
 
     static propTypes = {
-        error: PropTypes.oneOfType([
-            PropTypes.object,
-            PropTypes.array,
-            PropTypes.string
-        ]),
-        rooms: PropTypes.oneOfType([
-            PropTypes.object,
-            PropTypes.array
-        ]),
+        games : PropTypes.array,
+        user1 : PropTypes.string,
+        user2 : PropTypes.string,
         router: PropTypes.object
     };
 
     constructor() {
         super(...arguments);
 
-        this.elementsCount = 15;
-        this.totalElems = 15;
+        this.startFrom = 0;
+        this.elementsCount = this.totalElems = 12;
         this.scroll = 0;
         this.wrapperHeight = null;
+        this.requestCount = 0;
+        this.iteration = 0;
 
         this.state = {
-            value         : this.props.router.location.query.room || '',
+            searchValue   : this.props.router.location.query.room || '',
             error         : null,
             validForm     : false,
             pending       : false,
             scrollHeight  : 0,
             elemHeight    : 0,
-            renderElements: this.props.rooms.slice(0, this.elementsCount)
+            renderElements: [],
+            requested     : false,
+            focused       : '',
+            value         : {
+                user1: 'thiopentalum',
+                user2: 'Tryr',
+                user3: 'Borodach'
+            }
         }
     }
 
     componentDidMount() {
-        this.$scrollContainer.addEventListener('scroll', this.onScrollThrottled);
-        setTimeout(this.calculateSize, 0);
+        this.calculateSize();
+        this.checkValidity();
+        this.$scrollContainer && this.$scrollContainer.addEventListener('scroll', this.onScrollThrottled);
+        const observer = new MutationObserver(this.observerCallback);
+        const config = {
+            childList: true
+        };
+
+        observer.observe(this.$gameListBlock, config);
     }
 
     componentWillUnmount() {
         this.$scrollContainer.removeEventListener('scroll', this.onScrollThrottled);
     }
 
-    componentWillReceiveProps(nextProps) {
-        if(nextProps.rooms) {
-            this.addMoreItems()
-        }
+    componentWillReceiveProps() {
+        this.calculateSize();
     }
 
-    addMoreItems = (props = this.props) => {
-        this.setState({ renderElements: props.rooms.slice(0, this.totalElems) })
+    observerCallback = (list) => {
+        for(let mutation of list) {
+            if(mutation.type === 'childList') {
+                this.calculateSize();
+            }
+        }
     };
 
     onScroll = (e) => {
@@ -83,15 +96,15 @@ class Home extends Component {
         const containerHeight = this.$scrollContainer.offsetHeight;
         const childNode = this.$scrollContainer.childNodes[0].offsetHeight;
 
-        if((scrollPosition > this.scroll) && (this.totalElems < this.props.rooms.length)) {
+        if((scrollPosition > this.scroll) && (this.totalElems < this.props.games.length)) {
             if(!this.wrapperHeight) {
-                this.wrapperHeight = containerHeight + 200; // предзагрузка контента при скролле на 200 пикселей раньше конца блока
+                this.wrapperHeight = containerHeight + 100; // предзагрузка контента при скролле на 100 пикселей раньше конца блока
             } else if(!this.requestStep) {
                 this.requestStep = childNode - this.wrapperHeight;
             } else if(!this.state.pending && (scrollPosition > this.requestStep)) {
                 this.requestStep = childNode - this.wrapperHeight;
-                if(this.totalElems + this.elementsCount >= this.props.rooms.length) {
-                    this.totalElems = this.props.rooms.length;
+                if(this.totalElems + this.elementsCount >= this.props.games.length) {
+                    this.totalElems = this.props.games.length;
                 } else {
                     this.totalElems += this.elementsCount;
                 }
@@ -115,7 +128,35 @@ class Home extends Component {
         })
     };
 
+    checkValidity = () => {
+        this.setState({ validForm: Object.values(this.state.value).every((item) => item) })
+    };
+
     onChange = (e) => {
+        e && e.preventDefault();
+
+        const value = e.target.value.replace('https://steamcommunity.com/id/', '');
+        const name = e.target.name;
+
+        this.setState({
+            value: {
+                ...this.state.value,
+                [name]: value
+            }
+        }, this.checkValidity);
+    };
+
+    onSubmit = (e) => {
+        e && e.preventDefault();
+
+        const { validForm, pending } = this.state;
+
+        if(validForm && !pending) {
+            this.fetchSteam();
+        }
+    };
+
+    onChangeSearch = (e) => {
         e && e.preventDefault();
 
         const value = e.target.value;
@@ -123,7 +164,7 @@ class Home extends Component {
         this.setState({ value }, this.onSubmit);
     };
 
-    onSubmit = (e) => {
+    onSubmitSearch = (e) => {
         e && e.preventDefault();
 
         const currentPath = this.props.router.location.pathname;
@@ -134,99 +175,232 @@ class Home extends Component {
         this.context.router.push(targetPath);
     };
 
-    get elRoomList() {
-        const { pending, value, renderElements } = this.state;
-        const { rooms } = this.props;
-
-        if(!pending) {
-            return (
-                <div className={cx('home__roomlist-block')}>
-                    <div className={cx('home__roomheader')}>
-                        <p className={cx('home__roomheader-item', 'home__roomheader-item_number')}>Номер</p>
-                        <p className={cx('home__roomheader-item', 'home__roomheader-item_status')}>Статус</p>
-                        <p className={cx('home__roomheader-item', 'home__roomheader-item_buy')}>Покупки</p>
-                        <p className={cx('home__roomheader-item', 'home__roomheader-item_stop')}>Запрет на покупки</p>
-                    </div>
-                    <div className={cx('home__roomlist')} ref={(node) => { this.$scrollContainer = node }} style={{ height: this.state.scrollHeight }}>
-                        <div className={cx('home__roomlist-wrapper')}>
-                            {Array.isArray(rooms) && rooms.length ? (
-                                renderElements.map(({ id, price }, i) => {
-                                    const isChecked = price > 52620;
-                                    const isFree = price > 231111;
-
-                                    return (
-                                        <div key={i} className={cx('home__room')} ref={(node) => { this.$elem = node }}>
-                                            <p className={cx('home__room-item', 'home__room-item_number')}>{id}</p>
-                                            <p className={cx('home__room-item', 'home__room-item_status', `home__room-item_status-${isFree}`)}>{isFree ? 'Свободен' : 'Занят'}</p>
-                                            <p className={cx('home__room-item', 'home__room-item_buy')}>{`${price} ₽`}</p>
-                                            <div className={cx('home__room-item', 'home__room-item_stop')}>
-                                                <input type="checkbox" defaultChecked={isChecked} />
-                                            </div>
-                                        </div>
-                                    )
-                                })
-                            ) : (
-                                <div className={cx('home__error')}>
-                                    <span className={cx('home__error-icon')}>!</span>
-                                    <p className={cx('home__text')}>{`Комната с номером или именем гостя ${value} не найдена`}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )
+    errHandler = (data) => {
+        if(data.code === 500) {
+            throw new Error('These two users has too many intersections');
         }
+    };
+
+    addMoreItems = async (games = this.props.games, start = this.startFrom, end = this.props.games.length) => {
+        try {
+            const steps = await games.slice(start, end);
+            const renderElements = [];
+
+            await steps.reduce((prev, next) => {
+                return prev.then(() => {
+                    if(renderElements.length < this.elementsCount) {
+                        this.getMultiplayerGames(next).then((data) => {
+                            if(Object.keys(data).length) {
+                                this.iteration++;
+
+                                return renderElements.push(data);
+                            }
+                        })
+                    }
+                });
+            }, Promise.resolve()).then(() => renderElements);
+
+            await this.setState({
+                renderElements,
+                requested: true,
+                pending  : false
+            });
+
+            this.requestCount++;
+        } catch(error) {
+            console.error(error)
+        }
+    };
+
+    getMultiplayerGames = (game) => {
+        this.setState({ pending: true });
+
+        return fetch(`/multiplayer/${game}`)
+            .then((response) => response.json())
+            .then((data) => data)
+    };
+
+    dispatchToStore = (data) => {
+        return new Promise((resolve, reject) => {
+            resolve(this.context.store.dispatch(gamesToStore(data)));
+            reject(new Error('Dispatch failed'))
+        })
+            .then(() => {
+                // this.setState({ pending: false });
+            })
+            .then(() => {
+                this.addMoreItems();
+            })
+    };
+
+    fetchSteam = async () => {
+        this.setState({
+            pending: true
+        });
+
+        const { user1, user2 } = this.state.value;
+
+        try {
+            const response = await fetch(`/steam/${user1}/${user2}`);
+            const data = await response.json();
+
+            await this.errHandler(data);
+            await this.dispatchToStore(data);
+        } catch(error) {
+            this.setState({
+                error,
+                pending: false
+            });
+        }
+    };
+
+    renderElButton() {
+        const props = {
+            tagName  : 'button',
+            type     : 'submit',
+            className: cx('home__button'),
+            disabled : !this.state.validForm || this.state.pending,
+            children : 'Check games'
+        };
+
+        return <Button {...props} />
     }
 
-    get elPending() {
+    renderElGameList() {
+        const { requested, pending, renderElements, scrollHeight } = this.state;
+        const { games, user1, user2 } = this.props;
+
+        const showUsers = user1 && user2 && requested;
+        const showElements = requested && renderElements && renderElements.length > 0;
+        const showEmpty = requested && !pending && games && !games.length;
+
+        return (
+            <div className={cx('home__gamelist-block')} ref={(node) => { this.$gameListBlock = node }}>
+                {showUsers && <h3 className={cx('home__gamelist-header')}>Result for users: <span>{user1}</span> and <span>{user2}</span></h3>}
+                <div className={cx('home__gamelist')} style={{ height: scrollHeight }} ref={(node) => { this.$scrollContainer = node }}>
+                    <div className={cx('home__gamelist-wrapper')}>
+                        {showElements && renderElements.map(({ name, id }, i) => (
+                            <a ref={(node) => { this.$elem = node }} href={`https://store.steampowered.com/app/${id}`} key={i} className={cx('home__game')} target="_blank" rel="noopener noreferrer">
+                                <p className={cx('home__text', 'home__text_game')}>{name}</p>
+                                <img className={cx('home__image')} src={`https://steamcdn-a.akamaihd.net/steam/apps/${id}/header.jpg`} />
+                            </a>
+                        ))}
+                        {showEmpty && (
+                            <div className={cx('home__gamelist-block')}>
+                                <p className={cx('home__no-games')}>No multiplayer games intersection</p>
+                            </div>
+                        )}
+                        {this.renderElPending()}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    renderElPending() {
         const { pending, error } = this.state;
 
         if(pending && !error) {
             return (
-                <div className={cx('home__pending')}>
-                    <Loader className={cx('home__loader')} />
-                    <p className={cx('home__text', 'home__text_nomargin')}>Ожидание данных</p>
+                <div className={cx('home__pending-wrapper')}>
+                    <div className={cx('home__pending')}>
+                        <Loader className={cx('home__loader')} />
+                        <p className={cx('home__text', 'home__text_nomargin')}>Data pending</p>
+                    </div>
                 </div>
             )
         }
     }
 
-    get elError() {
-        const { pending } = this.state;
-        const { error } = this.props;
+    renderElError() {
+        const { pending, error } = this.state;
 
         if(!pending && error) {
             return (
                 <div className={cx('home__error')}>
                     <span className={cx('home__error-icon')}>!</span>
-                    <p className={cx('home__text')}>{error}</p>
+                    <p className={cx('home__text', 'home__text_nomargin')}>{error.message}</p>
                 </div>
             )
         }
     }
 
+    renderElInputs() {
+        const items = [
+            {
+                name : 'user1',
+                value: this.state.value.user1
+            },
+            {
+                name : 'user2',
+                value: this.state.value.user2
+            }
+        ];
+
+        return (
+            <div className={cx('home__inputs')}>
+                {items.map((item, index) => {
+                    const isFocused = !this.state.focused || this.state.focused === item.name;
+                    const className = cx('home__label', {
+                        ['home__label_focused']    : this.state.focused === item.name,
+                        ['home__label_not-focused']: this.state.focused && this.state.focused !== item.name
+                    });
+                    const props = {
+                        in           : isFocused,
+                        unmountOnExit: true,
+                        mountOnEnter : true,
+                        timeout      : {
+                            enter: 300,
+                            exit : 200
+                        }
+                    };
+
+                    return (
+                        <Transition {...props} key={`user-${index}`}>
+                            <label className={className} onFocus={this.onFocus} onBlur={this.onBlur}>
+                                <span className={cx('home__title')}>First player</span>
+                                <input type="text" name={item.name} className={cx('home__input')} onChange={this.onChange} value={item.value} />
+                            </label>
+                        </Transition>
+                    )
+                })}
+            </div>
+        )
+    }
+
+    onFocus = (e) => {
+        this.setState({
+            focused: e.target.name
+        })
+    };
+
+    onBlur = () => {
+        this.setState({ focused: '' })
+    };
+
     render() {
         return (
             <div className={cx('home')}>
                 <div className={cx('home__wrapper')}>
-                    <div className={cx('home__form-wrapper')}>
-                        <h2 className={cx('home__form-heading')}>Номерной фонд</h2>
-                        <form className={cx('home__form')} onSubmit={this.onSubmit}>
-                            <label className={cx('home__label')}>
-                                <Search className={cx('home__search')} />
-                                <input
-                                    value={this.state.value}
-                                    onChange={this.onChange}
-                                    type="search"
-                                    className={cx('home__input')}
-                                    placeholder="Введите номер комнаты или имя гостя"
-                                />
-                            </label>
-                        </form>
-                        {this.elPending}
-                        {this.elError}
+                    <div className={cx('home__header')}>
+                        <div className={cx('home__wrapper', 'home__wrapper_header')}>
+                            <img src="https://steamstore-a.akamaihd.net/public/shared/images/header/globalheader_logo.png?t=962016" className={cx('home__image')} />
+                            <h1 className={cx('home__heading')}>Steam API Service</h1>
+                        </div>
                     </div>
-                    {this.elRoomList}
+                    <div className={cx('home__form-wrapper')}>
+                        <h2 className={cx('home__form-heading')}>Request Multiplayer games</h2>
+                        <p className={cx('home__text')}>On this page you can check two players to have the same multiplayer games on Steam. Test:
+                            <strong> thiopentalum</strong>
+                            <strong> Tryr</strong>
+                        </p>
+                        <form className={cx('home__form')} onSubmit={this.onSubmit}>
+                            {this.renderElInputs()}
+                            {this.renderElError()}
+                            {this.renderElButton()}
+                        </form>
+                    </div>
+                    {this.renderElGameList()}
                 </div>
             </div>
         )
@@ -235,30 +409,6 @@ class Home extends Component {
 }
 
 export default {
-    path   : '/rooms',
-    action : () => Home,
-    fetcher: [{
-        promise: ({ location, helpers: { store: { dispatch } } }) => {
-            const filterParam = location.query.room;
-
-            return fetch('http://localhost:3000/data')
-                .then((result) => {
-                    if(!result.ok) {
-                        throw new Error(`${result.status} ${result.statusText}`);
-                    }
-
-                    return result.json()
-                })
-                .then((data) => {
-                    if(filterParam) {
-                        const filtered = data.filter((item) => filterParam === item.id.toString() || item.guestname.indexOf(filterParam) !== -1);
-
-                        return dispatch(roomsToStore(filtered))
-                    }
-
-                    return dispatch(roomsToStore(data))
-                })
-                .catch((error) => dispatch(roomsError(error.message)))
-        }
-    }]
+    path  : '/',
+    action: () => Home
 }

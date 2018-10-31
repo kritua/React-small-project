@@ -1,19 +1,11 @@
 ## Install and start
 
 ```
-npm i && npm run development
+yarn && yarn development
 ```
 
 ## Client address
 
 ```
-localhost:8082/rooms
+localhost:8082
 ```
-
-
-## API address
-
-```
-localhost:3000/data
-```
-

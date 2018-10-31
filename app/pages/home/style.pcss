@@ -2,16 +2,14 @@
 
     .home {
         height: 100vh;
-        padding: 20px 0;
-        max-height: 100vh;
-        box-sizing: border-box;
+        color: #fff;
+        background: #1b2838;
         overflow: hidden;
 
         &__wrapper {
             height: 100%;
             width: 100%;
             margin: 0 auto;
-            max-width: 800px;
 
             &_header {
                 display: flex;
@@ -19,14 +17,21 @@
             }
         }
 
-        &__form-wrapper {
-            margin: 0 auto;
+        &__header {
+            background: #171a21;
+            width: 100%;
+            padding: 20px 40px;
+            box-sizing: border-box;
         }
 
-        &__form-heading {
+        &__heading {
+            margin-left: 50px;
             font-weight: 300;
-            margin-bottom: 20px;
-            text-align: center;
+        }
+
+        &__form-wrapper {
+            max-width: 600px;
+            margin: 15px auto;
         }
 
         &__form {
@@ -35,30 +40,35 @@
             justify-content: center;
         }
 
+        &__form-heading {
+            margin: 15px 0;
+        }
+
+        &__inputs {
+            flex-basis: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
         &__label {
-            position: relative;
-            width: 100%;
+            width: 30%;
+            transition: all 200ms;
+
+            &_focused {
+                flex-grow: 1;
+            }
+
+            &_not-focused {
+                flex-shrink: 1;
+            }
         }
 
         &__input {
-            border: 1px solid transparent;
-            border-bottom-color: #ccc;
+            border: 1px solid #ccc;
             border-radius: 3px;
             padding: 10px;
             width: 100%;
             box-sizing: border-box;
-            padding-left: 30px;
-            font-size: 16px;
-        }
-
-        &__search {
-            position: absolute;
-            left: 0;
-            width: 20px;
-            height: 20px;
-            fill: #585858;
-            top: 50%;
-            margin-top: -10px;
         }
 
         &__title {
@@ -70,18 +80,31 @@
         &__error {
             display: flex;
             align-items: center;
-            margin: 15px 0 0;
+            margin: 15px auto 0;
             background: #fff6da;
             padding: 5px 10px;
             flex-basis: 100%;
-            line-height: 40px;
             height: 40px;
             color: #585858;
+            max-width: 600px;
+        }
+
+        &__pending-wrapper {
+            flex-basis: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        &__pending {
+            background: none;
+            color: #fff;
+            justify-content: center;
         }
 
         &__error-icon {
             width: 20px;
             height: 20px;
+            min-width: 20px;
             background-color: #ff4d00;
             display: flex;
             align-items: center;
@@ -100,27 +123,37 @@
             margin-top: 15px;
         }
 
-        &__roomlist {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
+        &__text {
+            margin: 15px 0;
+
+            &_nomargin {
+                margin: 0;
+            }
+
+            &_game {
+                margin: 7px 0;
+            }
+        }
+
+        &__gamelist {
             overflow-y: scroll;
-            align-items: flex-start;
         }
 
-        &__roomlist-wrapper {
+        &__gamelist-wrapper {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            width: 100%;
+            padding-bottom: 30px;
         }
 
-        &__roomlist-block {
+        &__gamelist-block {
             margin: 15px auto;
+            max-width: 1200px;
         }
 
-        &__roomlist-header {
+        &__gamelist-header {
             font-weight: 400;
+            margin: 15px 0;
 
             span {
                 font-weight: 700;
@@ -128,89 +161,29 @@
             }
         }
 
-        &__room {
-            flex-basis: 100%;
-            display: flex;
+        &__game {
+            flex-basis: 24%;
+            padding: 10px 15px;
+            display: block;
             box-sizing: border-box;
+            margin-bottom: 1%;
             text-decoration: none;
             color: inherit;
+            background: rgba(0, 0, 0, 0.2);
             transition: 0.2s ease all;
-            border: 1px solid #ccc;
 
-            &:not(:last-child) {
-                border-bottom-color: transparent;
-            }
-
-            &:nth-child(2n) {
-                background: #f1f1f1;
-            }
-        }
-
-        &__roomheader {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0 15px;
-        }
-
-        &__roomheader-item,
-        &__room-item {
-            flex-basis: 15%;
-            flex-grow: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 5px;
-
-            &_stop {
-                flex-basis: 20%;
-            }
-
-            &_status {
-                flex-grow: 1;
-            }
-        }
-
-        &__room-item {
-            position: relative;
-            min-height: 60px;
-
-            &:not(:last-child) {
-                border-right: 1px solid #ccc;
-            }
-
-            &_status {
-                padding-left: 60px;
-                justify-content: flex-start;
-
-                &::before {
-                    position: absolute;
-                    transform: translateX(-30px);
-                    content: "";
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 50%;
-                    opacity: 0.5;
-                }
-            }
-
-            &_status-false {
-
-                &::before {
-                    background: #ff0000;
-                }
-            }
-
-            &_status-true {
-
-                &::before {
-                    background: #007345;
-                }
+            &:hover {
+                background: rgba(255, 255, 255, 0.2);
             }
         }
 
         &__image {
             max-width: 100%;
             height: auto;
+        }
+
+        &__no-games {
+            text-align: center;
         }
     }
 }

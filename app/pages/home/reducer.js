@@ -1,21 +1,13 @@
 import { handleActions } from 'redux-actions-helpers';
-import { roomsToStore, roomsError } from './actions';
+import { gamesToStore, errorToStore } from './actions';
 
-const initialState = {
-    rooms: [],
-    error: ''
-};
+const initialState = [];
 
 export default handleActions({
-    [roomsToStore]: (state, action) => {
-        return {
-            rooms: action.payload
-        };
+    [gamesToStore]: (state, { payload }) => {
+        return payload;
     },
-    [roomsError]: (state, action) => {
-        return {
-            ...state,
-            error: action.payload
-        };
+    [errorToStore]: (state, { payload }) => {
+        return payload
     }
 }, { initialState });

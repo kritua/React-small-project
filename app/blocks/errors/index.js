@@ -1,13 +1,8 @@
-// @flow
-import NotFound from 'block/not-found'
-import Forbidden from 'block/forbidden'
+import NotFound from 'block/not-found';
+import Forbidden from 'block/forbidden';
 
-const error: {
-    [code: string | number]: *
-} = {
-    // $FlowFixMe
+const error = {
     404: NotFound,
-    // $FlowFixMe
     403: Forbidden
 };
 

@@ -1,5 +1,5 @@
 const common = {
-    client : ['babel-polyfill', './app'],
+    client : ['@babel/polyfill', './app'],
     server : './server'
 };
 
