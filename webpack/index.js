@@ -13,8 +13,6 @@ module.exports = (env = {}) => {
         server      : !!env.server
     };
 
-    console.log(require('./target'))
-
     const config = {
         mode            : global.webpack.env,
         context         : global.webpack.context,
