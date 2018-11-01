@@ -53,16 +53,35 @@
         &__form {
             display: flex;
             flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        &__price-label {
+            position: relative;
+            width: 100%;
         }
 
         &__fieldset {
             padding: 0;
             border: 0;
 
+            &_price {
+                flex-basis: 15%;
+            }
+
             &_checkbox {
                 flex-basis: auto;
-                margin-left: 10px;
             }
+        }
+
+        &__price-input {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 0 10px;
+            height: 40px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
         }
 
         &__checkbox-wrapper {

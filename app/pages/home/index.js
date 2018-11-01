@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames/bind';
 import { roomsToStore, roomsError } from './actions';
@@ -147,6 +147,17 @@ class Home extends Component {
         }, this.onSubmit)
     };
 
+    onChange = (e) => {
+        const { name, value } = e.target;
+
+        this.setState({
+            params: {
+                ...this.state.params,
+                [name]: value
+            }
+        }, this.onSubmit)
+    };
+
     onSubmit = (e) => {
         e && e.preventDefault();
 
@@ -287,7 +298,7 @@ class Home extends Component {
             <div className={cx('home__form-controls')}>
                 <div className={cx('home__form-inner')}>
                     <h2 className={cx('home__form-heading')}>Купить квартиру</h2>
-                    <form className={cx('home__form')} onSubmit={this.onSubmit}>
+                    <form className={cx('home__form')}>
                         <fieldset className={cx('home__fieldset', 'home__fieldset_checkbox')}>
                             <div className={cx('home__checkbox-wrapper')}>
                                 <input
@@ -319,9 +330,45 @@ class Home extends Component {
                             </div>
                         </fieldset>
                         {this.renderRoomsInput}
+                        {this.renderPriceInputs}
                     </form>
                 </div>
             </div>
+        )
+    }
+
+    get renderPriceInputs() {
+        const { rooms } = this.props;
+        const { params } = this.state;
+        const pricesArr = rooms.map((item) => item.price);
+        const minValue = params.price_gte || Math.min(...pricesArr);
+        const maxValue = params.price_lte || Math.max(...pricesArr);
+
+        return (
+            <Fragment>
+                <fieldset className={cx('home__fieldset', 'home__fieldset_price')}>
+                    <input
+                        value={minValue}
+                        onChange={this.onChange}
+                        name="price_gte"
+                        type="number"
+                        className={cx('home__price-input')}
+                        placeholder="Минимальная цена"
+                    />
+                    <label className={cx('home__price-label')}>Минимальная цена</label>
+                </fieldset>
+                <fieldset className={cx('home__fieldset', 'home__fieldset_price')}>
+                    <input
+                        value={maxValue}
+                        onChange={this.onChange}
+                        name="price_lte"
+                        type="number"
+                        className={cx('home__price-input')}
+                        placeholder="Максимальная цена"
+                    />
+                    <label className={cx('home__price-label')}>Максимальная цена</label>
+                </fieldset>
+            </Fragment>
         )
     }
 
