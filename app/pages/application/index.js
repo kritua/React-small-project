@@ -25,11 +25,7 @@ class Application extends PureComponent {
     };
 
     render() {
-        return (
-            <div>
-                {this.props.children}
-            </div>
-        )
+        return this.props.children;
     }
 
 }

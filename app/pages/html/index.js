@@ -27,7 +27,6 @@ class Html extends Component {
     };
 
     runtime = () => {
-        // TODO: inline in html
         if(process.env.NODE_ENV === 'production') {
             return <script src={this.props.assets.javascript.runtime} defer={true} />
         }

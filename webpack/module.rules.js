@@ -6,12 +6,14 @@ module.exports = [
     require('./module.rules.img'),
     require('./module.rules.babel'),
     {
+        type: 'javascript/auto',
+        test: /\.mjs$/,
+        use: []
+    },
+    {
         test    : /\.jsx?$/,
         exclude : [
-            resolve(global.webpack.context, 'bin'),
             resolve(global.webpack.context, 'configs'),
-            resolve(global.webpack.context, 'git-hooks'),
-            resolve(global.webpack.context, 'public'),
             resolve(global.webpack.context, 'server', 'build'),
             resolve(global.webpack.context, 'webpack')
         ],

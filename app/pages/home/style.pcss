@@ -2,73 +2,102 @@
 
     .home {
         height: 100vh;
-        color: #fff;
-        background: #1b2838;
+        max-height: 100vh;
+        box-sizing: border-box;
         overflow: hidden;
 
         &__wrapper {
             height: 100%;
             width: 100%;
             margin: 0 auto;
+            max-width: 1200px;
+        }
 
-            &_header {
-                display: flex;
-                align-items: center;
-            }
+        &__form-inner {
+            margin: 0 auto;
+            max-width: 1200px;
+            padding: 20px;
         }
 
         &__header {
-            background: #171a21;
+            padding: 20px 0;
+            box-shadow: 0 1px 1px 0 #ccc;
             width: 100%;
-            padding: 20px 40px;
-            box-sizing: border-box;
         }
 
-        &__heading {
-            margin-left: 50px;
-            font-weight: 300;
+        &__header-inner {
+            margin: 0 auto;
+            max-width: 1200px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        &__result-block {
+            background: #eee;
+            padding: 10px;
         }
 
         &__form-wrapper {
-            max-width: 600px;
-            margin: 15px auto;
+            margin: 0 auto;
+        }
+
+        &__form-heading {
+            margin-bottom: 20px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 30px;
         }
 
         &__form {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
         }
 
-        &__form-heading {
-            margin: 15px 0;
+        &__fieldset {
+            padding: 0;
+            border: 0;
+
+            &_checkbox {
+                flex-basis: auto;
+                margin-left: 10px;
+            }
         }
 
-        &__inputs {
-            flex-basis: 100%;
+        &__checkbox-wrapper {
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            height: 40px;
         }
 
-        &__label {
-            width: 30%;
-            transition: all 200ms;
-
-            &_focused {
-                flex-grow: 1;
-            }
-
-            &_not-focused {
-                flex-shrink: 1;
-            }
-        }
-
-        &__input {
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            padding: 10px;
+        &__checkbox-label {
+            position: relative;
             width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 0 15px;
             box-sizing: border-box;
+            transition-property: background-color, color;
+            transition-duration: 300ms;
+            transition-timing-function: ease;
+            color: #757575;
+            cursor: pointer;
+        }
+
+        &__checkbox-input {
+            visibility: hidden;
+            width: 0;
+            height: 0;
+
+            &:checked + .home__checkbox-label {
+                background: #60b9ca;
+                color: #fff;
+            }
         }
 
         &__title {
@@ -80,31 +109,18 @@
         &__error {
             display: flex;
             align-items: center;
-            margin: 15px auto 0;
+            margin: 15px 0 0;
             background: #fff6da;
             padding: 5px 10px;
             flex-basis: 100%;
+            line-height: 40px;
             height: 40px;
             color: #585858;
-            max-width: 600px;
-        }
-
-        &__pending-wrapper {
-            flex-basis: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        &__pending {
-            background: none;
-            color: #fff;
-            justify-content: center;
         }
 
         &__error-icon {
             width: 20px;
             height: 20px;
-            min-width: 20px;
             background-color: #ff4d00;
             display: flex;
             align-items: center;
@@ -123,37 +139,23 @@
             margin-top: 15px;
         }
 
-        &__text {
-            margin: 15px 0;
-
-            &_nomargin {
-                margin: 0;
-            }
-
-            &_game {
-                margin: 7px 0;
-            }
-        }
-
-        &__gamelist {
-            overflow-y: scroll;
-        }
-
-        &__gamelist-wrapper {
+        &__roomlist {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            padding-bottom: 30px;
+            overflow-y: scroll;
+            align-items: flex-start;
         }
 
-        &__gamelist-block {
-            margin: 15px auto;
-            max-width: 1200px;
+        &__roomlist-wrapper {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
-        &__gamelist-header {
+        &__roomlist-header {
             font-weight: 400;
-            margin: 15px 0;
 
             span {
                 font-weight: 700;
@@ -161,29 +163,86 @@
             }
         }
 
-        &__game {
-            flex-basis: 24%;
-            padding: 10px 15px;
-            display: block;
+        &__room {
+            flex-basis: 100%;
+            display: flex;
             box-sizing: border-box;
-            margin-bottom: 1%;
             text-decoration: none;
             color: inherit;
-            background: rgba(0, 0, 0, 0.2);
             transition: 0.2s ease all;
+            border: 1px solid #ccc;
+            background: #fff;
+            margin: 10px 0;
+            height: 200px;
+        }
 
-            &:hover {
-                background: rgba(255, 255, 255, 0.2);
+        &__room-content {
+            flex-basis: 75%;
+            padding: 25px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        &__room-image {
+            flex-basis: 25%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        &__room-img {
+            max-width: 250px;
+            max-height: 180px;
+        }
+
+        &__room-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-basis: 100%;
+
+            &:not(:first-of-type) {
+                margin-top: 10px;
+            }
+
+            &_features {
+                justify-content: flex-start;
+            }
+        }
+
+        &__room-item {
+
+            &_type {
+                color: #55a9b6;
+                font-size: 26px;
+                line-height: 40px;
+            }
+
+            &_price {
+                font-size: 20px;
+                line-height: 30px;
+            }
+
+            &_address {
+                font-size: 14px;
+                color: #848484;
+            }
+
+            &_features {
+                font-size: 14px;
+
+                &:not(:last-of-type) {
+                    margin-right: 10px;
+                }
             }
         }
 
         &__image {
-            max-width: 100%;
-            height: auto;
+            width: 130px;
+            height: 50px;
+            background: url("./img/logo.png") no-repeat center;
+            background-size: contain;
         }
 
-        &__no-games {
-            text-align: center;
-        }
     }
 }

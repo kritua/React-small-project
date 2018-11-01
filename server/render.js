@@ -20,13 +20,6 @@ const assets = {
     styles: {}
 };
 
-const assets = {
-    javascript: {
-        main: 'http://localhost:8082/main.js'
-    },
-    styles: {}
-};
-
 export default async function(req, res) {
     console.log('Incoming request', {
         method: req.method,

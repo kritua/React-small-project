@@ -15,7 +15,7 @@ const use = [{
         modules         : true,
         sourceMap       : global.webpack.development,
         minimize        : global.webpack.production,
-        localIdentName  : global.webpack.production ? '[hash:hex]' : '[local]'
+        localIdentName  : global.webpack.production ? '[hash:hex]' : '[local]-[hash:hex:5]'
     }
 }, {
     loader : 'postcss',

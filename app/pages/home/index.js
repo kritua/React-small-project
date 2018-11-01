@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames/bind';
-import { gamesToStore } from './actions';
+import { roomsToStore, roomsError } from './actions';
 import { connect } from 'react-redux';
+import fetch from 'node-fetch';
 import throttle from 'lodash.throttle';
-import { Transition } from 'react-transition-group';
 
-import Button from 'block/button';
 import Loader from 'block/loader';
 
 import style from './style';
@@ -14,9 +13,8 @@ import style from './style';
 const cx = classnames.bind(style);
 
 @connect((state) => ({
-    games : state.gameList && state.gameList.games,
-    user1 : state.gameList && state.gameList.user1,
-    user2 : state.gameList && state.gameList.user2,
+    rooms : state.roomList.rooms,
+    error : state.roomList.error,
     router: state.router
 }))
 class Home extends Component {
@@ -29,66 +27,54 @@ class Home extends Component {
     };
 
     static propTypes = {
-        games : PropTypes.array,
-        user1 : PropTypes.string,
-        user2 : PropTypes.string,
+        error: PropTypes.oneOfType([
+            PropTypes.object,
+            PropTypes.array,
+            PropTypes.string
+        ]),
+        rooms: PropTypes.oneOfType([
+            PropTypes.object,
+            PropTypes.array
+        ]),
         router: PropTypes.object
     };
 
     constructor() {
         super(...arguments);
 
-        this.startFrom = 0;
-        this.elementsCount = this.totalElems = 12;
+        this.elementsCount = 8;
+        this.totalElems = 8;
         this.scroll = 0;
         this.wrapperHeight = null;
-        this.requestCount = 0;
-        this.iteration = 0;
 
         this.state = {
-            searchValue   : this.props.router.location.query.room || '',
             error         : null,
             validForm     : false,
             pending       : false,
             scrollHeight  : 0,
             elemHeight    : 0,
-            renderElements: [],
-            requested     : false,
-            focused       : '',
-            value         : {
-                user1: 'thiopentalum',
-                user2: 'Tryr',
-                user3: 'Borodach'
-            }
+            renderElements: this.props.rooms.slice(0, this.elementsCount),
+            params        : this.props.router.location.query || {}
         }
     }
 
     componentDidMount() {
-        this.calculateSize();
-        this.checkValidity();
-        this.$scrollContainer && this.$scrollContainer.addEventListener('scroll', this.onScrollThrottled);
-        const observer = new MutationObserver(this.observerCallback);
-        const config = {
-            childList: true
-        };
-
-        observer.observe(this.$gameListBlock, config);
+        this.$scrollContainer.addEventListener('scroll', this.onScrollThrottled);
+        setTimeout(this.calculateSize, 0);
     }
 
     componentWillUnmount() {
         this.$scrollContainer.removeEventListener('scroll', this.onScrollThrottled);
     }
 
-    componentWillReceiveProps() {
-        this.calculateSize();
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.rooms) {
+            this.addMoreItems()
+        }
     }
 
-    observerCallback = (list) => {
-        for(let mutation of list) {
-            if(mutation.type === 'childList') {
-                this.calculateSize();
-            }
-        }
+    addMoreItems = (props = this.props) => {
+        this.setState({ renderElements: props.rooms.slice(0, this.totalElems) })
     };
 
     onScroll = (e) => {
@@ -96,15 +82,15 @@ class Home extends Component {
         const containerHeight = this.$scrollContainer.offsetHeight;
         const childNode = this.$scrollContainer.childNodes[0].offsetHeight;
 
-        if((scrollPosition > this.scroll) && (this.totalElems < this.props.games.length)) {
+        if((scrollPosition > this.scroll) && (this.totalElems < this.props.rooms.length)) {
             if(!this.wrapperHeight) {
-                this.wrapperHeight = containerHeight + 100; // предзагрузка контента при скролле на 100 пикселей раньше конца блока
+                this.wrapperHeight = containerHeight + 200; // предзагрузка контента при скролле на 200 пикселей раньше конца блока
             } else if(!this.requestStep) {
                 this.requestStep = childNode - this.wrapperHeight;
             } else if(!this.state.pending && (scrollPosition > this.requestStep)) {
                 this.requestStep = childNode - this.wrapperHeight;
-                if(this.totalElems + this.elementsCount >= this.props.games.length) {
-                    this.totalElems = this.props.games.length;
+                if(this.totalElems + this.elementsCount >= this.props.rooms.length) {
+                    this.totalElems = this.props.rooms.length;
                 } else {
                     this.totalElems += this.elementsCount;
                 }
@@ -128,279 +114,261 @@ class Home extends Component {
         })
     };
 
-    checkValidity = () => {
-        this.setState({ validForm: Object.values(this.state.value).every((item) => item) })
+    onChangeCheckbox = (e) => {
+        const { name, checked } = e.target;
+        const params = { ...this.state.params };
+
+        if(checked) {
+            params[name] = checked;
+        } else {
+            delete params[name];
+        }
+
+        this.setState({ params }, this.onSubmit)
     };
 
-    onChange = (e) => {
-        e && e.preventDefault();
+    onChangeRooms = (e) => {
+        const { name, value, checked } = e.target;
+        const arr = this.state.params.rooms_count ? [...this.state.params.rooms_count] : [];
 
-        const value = e.target.value.replace('https://steamcommunity.com/id/', '');
-        const name = e.target.name;
+        if(arr.indexOf(value) === -1 && checked) {
+            arr.push(value)
+        } else {
+            const itemToRemove = arr.findIndex((item) => item === value);
+
+            arr.splice(itemToRemove, 1);
+        }
 
         this.setState({
-            value: {
-                ...this.state.value,
-                [name]: value
+            params: {
+                ...this.state.params,
+                [name]: arr.sort((a, b) => a - b)
             }
-        }, this.checkValidity);
+        }, this.onSubmit)
     };
 
     onSubmit = (e) => {
         e && e.preventDefault();
 
-        const { validForm, pending } = this.state;
+        const { pathname } = this.props.router.location;
+        const { params } = this.state;
 
-        if(validForm && !pending) {
-            this.fetchSteam();
-        }
-    };
-
-    onChangeSearch = (e) => {
-        e && e.preventDefault();
-
-        const value = e.target.value;
-
-        this.setState({ value }, this.onSubmit);
-    };
-
-    onSubmitSearch = (e) => {
-        e && e.preventDefault();
-
-        const currentPath = this.props.router.location.pathname;
-        const searchString = this.state.value ? `?room=${this.state.value}` : '';
-        const targetPath = `${currentPath}${searchString}`;
-
-        this.setState({ error: null });
-        this.context.router.push(targetPath);
-    };
-
-    errHandler = (data) => {
-        if(data.code === 500) {
-            throw new Error('These two users has too many intersections');
-        }
-    };
-
-    addMoreItems = async (games = this.props.games, start = this.startFrom, end = this.props.games.length) => {
-        try {
-            const steps = await games.slice(start, end);
-            const renderElements = [];
-
-            await steps.reduce((prev, next) => {
-                return prev.then(() => {
-                    if(renderElements.length < this.elementsCount) {
-                        this.getMultiplayerGames(next).then((data) => {
-                            if(Object.keys(data).length) {
-                                this.iteration++;
-
-                                return renderElements.push(data);
-                            }
-                        })
-                    }
-                });
-            }, Promise.resolve()).then(() => renderElements);
-
-            await this.setState({
-                renderElements,
-                requested: true,
-                pending  : false
-            });
-
-            this.requestCount++;
-        } catch(error) {
-            console.error(error)
-        }
-    };
-
-    getMultiplayerGames = (game) => {
-        this.setState({ pending: true });
-
-        return fetch(`/multiplayer/${game}`)
-            .then((response) => response.json())
-            .then((data) => data)
-    };
-
-    dispatchToStore = (data) => {
-        return new Promise((resolve, reject) => {
-            resolve(this.context.store.dispatch(gamesToStore(data)));
-            reject(new Error('Dispatch failed'))
-        })
-            .then(() => {
-                // this.setState({ pending: false });
-            })
-            .then(() => {
-                this.addMoreItems();
-            })
-    };
-
-    fetchSteam = async () => {
-        this.setState({
-            pending: true
+        this.context.router.push({
+            pathname,
+            query: params
         });
-
-        const { user1, user2 } = this.state.value;
-
-        try {
-            const response = await fetch(`/steam/${user1}/${user2}`);
-            const data = await response.json();
-
-            await this.errHandler(data);
-            await this.dispatchToStore(data);
-        } catch(error) {
-            this.setState({
-                error,
-                pending: false
-            });
-        }
     };
 
-    renderElButton() {
-        const props = {
-            tagName  : 'button',
-            type     : 'submit',
-            className: cx('home__button'),
-            disabled : !this.state.validForm || this.state.pending,
-            children : 'Check games'
-        };
+    get elRoomList() {
+        const { pending } = this.state;
 
-        return <Button {...props} />
-    }
-
-    renderElGameList() {
-        const { requested, pending, renderElements, scrollHeight } = this.state;
-        const { games, user1, user2 } = this.props;
-
-        const showUsers = user1 && user2 && requested;
-        const showElements = requested && renderElements && renderElements.length > 0;
-        const showEmpty = requested && !pending && games && !games.length;
+        if(pending) {
+            return;
+        }
 
         return (
-            <div className={cx('home__gamelist-block')} ref={(node) => { this.$gameListBlock = node }}>
-                {showUsers && <h3 className={cx('home__gamelist-header')}>Result for users: <span>{user1}</span> and <span>{user2}</span></h3>}
-                <div className={cx('home__gamelist')} style={{ height: scrollHeight }} ref={(node) => { this.$scrollContainer = node }}>
-                    <div className={cx('home__gamelist-wrapper')}>
-                        {showElements && renderElements.map(({ name, id }, i) => (
-                            <a ref={(node) => { this.$elem = node }} href={`https://store.steampowered.com/app/${id}`} key={i} className={cx('home__game')} target="_blank" rel="noopener noreferrer">
-                                <p className={cx('home__text', 'home__text_game')}>{name}</p>
-                                <img className={cx('home__image')} src={`https://steamcdn-a.akamaihd.net/steam/apps/${id}/header.jpg`} />
-                            </a>
-                        ))}
-                        {showEmpty && (
-                            <div className={cx('home__gamelist-block')}>
-                                <p className={cx('home__no-games')}>No multiplayer games intersection</p>
-                            </div>
-                        )}
-                        {this.renderElPending()}
-                    </div>
+            <div className={cx('home__roomlist-block')}>
+                <div
+                    className={cx('home__roomlist')}
+                    ref={(node) => { this.$scrollContainer = node }}
+                    style={{ height: this.state.scrollHeight }}
+                >
+                    {this.elRoomListInner}
                 </div>
             </div>
         )
     }
 
-    renderElPending() {
-        const { pending, error } = this.state;
+    get elRoomListInner() {
+        const { rooms } = this.props;
+        const { renderElements } = this.state;
 
-        if(pending && !error) {
-            return (
-                <div className={cx('home__pending-wrapper')}>
-                    <div className={cx('home__pending')}>
-                        <Loader className={cx('home__loader')} />
-                        <p className={cx('home__text', 'home__text_nomargin')}>Data pending</p>
-                    </div>
-                </div>
-            )
-        }
-    }
-
-    renderElError() {
-        const { pending, error } = this.state;
-
-        if(!pending && error) {
+        if(!Array.isArray(rooms) || !rooms.length) {
             return (
                 <div className={cx('home__error')}>
                     <span className={cx('home__error-icon')}>!</span>
-                    <p className={cx('home__text', 'home__text_nomargin')}>{error.message}</p>
+                    <p className={cx('home__text')}>Результатов с такими параметрами не найдено</p>
                 </div>
             )
         }
-    }
-
-    renderElInputs() {
-        const items = [
-            {
-                name : 'user1',
-                value: this.state.value.user1
-            },
-            {
-                name : 'user2',
-                value: this.state.value.user2
-            }
-        ];
 
         return (
-            <div className={cx('home__inputs')}>
-                {items.map((item, index) => {
-                    const isFocused = !this.state.focused || this.state.focused === item.name;
-                    const className = cx('home__label', {
-                        ['home__label_focused']    : this.state.focused === item.name,
-                        ['home__label_not-focused']: this.state.focused && this.state.focused !== item.name
-                    });
-                    const props = {
-                        in           : isFocused,
-                        unmountOnExit: true,
-                        mountOnEnter : true,
-                        timeout      : {
-                            enter: 300,
-                            exit : 200
-                        }
+            <div className={cx('home__roomlist-wrapper')}>
+                {renderElements.map((item, i) => {
+                    const {
+                        price, square, seller, phone,
+                        address: { city, street, suite },
+                        is_mortgage: isMortgage,
+                        rooms_count: roomsCount,
+                        is_installment: isInstallment
+                    } = item;
+                    const src = {
+                        1: 'https://media.ongrad.ru/api/images/16.31.jpg',
+                        2: 'https://media.ongrad.ru/api/images/63.9_y51RuUF.jpg',
+                        3: 'https://media.ongrad.ru/api/images/3kk_79.0.jpg'
                     };
 
                     return (
-                        <Transition {...props} key={`user-${index}`}>
-                            <label className={className} onFocus={this.onFocus} onBlur={this.onBlur}>
-                                <span className={cx('home__title')}>First player</span>
-                                <input type="text" name={item.name} className={cx('home__input')} onChange={this.onChange} value={item.value} />
-                            </label>
-                        </Transition>
+                        <div key={i} className={cx('home__room')} ref={(node) => { this.$elem = node }}>
+                            <div className={cx('home__room-image')}>
+                                <img src={src[roomsCount]} className={cx('home__room-img')} />
+                            </div>
+                            <div className={cx('home__room-content')}>
+                                <div className={cx('home__room-row')}>
+                                    <p className={cx('home__room-item', 'home__room-item_type')}>
+                                        {`${roomsCount}-комнатная квартира, ${square} m`}&sup2;
+                                    </p>
+                                    <p className={cx('home__room-item', 'home__room-item_price')}>
+                                        {`${price} ₽`}
+                                    </p>
+                                </div>
+                                <div className={cx('home__room-row')}>
+                                    <p className={cx('home__room-item', 'home__room-item_address')}>
+                                        {`${city}, ${street}, ${suite}`}
+                                    </p>
+                                </div>
+                                <div className={cx('home__room-row', 'home__room-row_features')}>
+                                    <p className={cx('home__room-item', 'home__room-item_features')}>
+                                        Ипотека: {isMortgage ? 'Да' : 'Нет' }
+                                    </p>
+                                    <p className={cx('home__room-item', 'home__room-item_features')}>
+                                        Рассрочка: {isInstallment ? 'Да' : 'Нет' }
+                                    </p>
+                                </div>
+                                <div className={cx('home__room-row')}>
+                                    <p className={cx('home__room-item', 'home__room-item_seller')}>
+                                        Продавец: {seller}
+                                    </p>
+                                    <p className={cx('home__room-item', 'home__room-item_seller')}>
+                                        Телефон: {phone}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     )
                 })}
             </div>
         )
     }
 
-    onFocus = (e) => {
-        this.setState({
-            focused: e.target.name
-        })
-    };
+    get elPending() {
+        const { pending, error } = this.state;
 
-    onBlur = () => {
-        this.setState({ focused: '' })
-    };
+        if(pending && !error) {
+            return (
+                <div className={cx('home__pending')}>
+                    <Loader className={cx('home__loader')} />
+                    <p className={cx('home__text', 'home__text_nomargin')}>Ожидание данных</p>
+                </div>
+            )
+        }
+    }
+
+    get elError() {
+        const { pending } = this.state;
+        const { error } = this.props;
+
+        if(!pending && error) {
+            return (
+                <div className={cx('home__error')}>
+                    <span className={cx('home__error-icon')}>!</span>
+                    <p className={cx('home__text')}>{error}</p>
+                </div>
+            )
+        }
+    }
+
+    get elControls() {
+        const { params } = this.state;
+        const mortgageChecked = typeof params.is_mortgage === 'string' ? JSON.parse(params.is_mortgage) : params.is_mortgage;
+        const installmentChecked = typeof params.is_installment === 'string' ? JSON.parse(params.is_installment) : params.is_installment;
+
+        return (
+            <div className={cx('home__form-controls')}>
+                <div className={cx('home__form-inner')}>
+                    <h2 className={cx('home__form-heading')}>Купить квартиру</h2>
+                    <form className={cx('home__form')} onSubmit={this.onSubmit}>
+                        <fieldset className={cx('home__fieldset', 'home__fieldset_checkbox')}>
+                            <div className={cx('home__checkbox-wrapper')}>
+                                <input
+                                    type="checkbox"
+                                    name="is_mortgage"
+                                    id="mortgage"
+                                    className={cx('home__checkbox-input')}
+                                    onChange={this.onChangeCheckbox}
+                                    checked={mortgageChecked || false}
+                                />
+                                <label htmlFor="mortgage" className={cx('home__checkbox-label')}>
+                                    Ипотека
+                                </label>
+                            </div>
+                        </fieldset>
+                        <fieldset className={cx('home__fieldset', 'home__fieldset_checkbox')}>
+                            <div className={cx('home__checkbox-wrapper')}>
+                                <input
+                                    type="checkbox"
+                                    name="is_installment"
+                                    id="installment"
+                                    className={cx('home__checkbox-input')}
+                                    onChange={this.onChangeCheckbox}
+                                    checked={installmentChecked || false}
+                                />
+                                <label htmlFor="installment" className={cx('home__checkbox-label')}>
+                                    Рассрочка
+                                </label>
+                            </div>
+                        </fieldset>
+                        {this.renderRoomsInput}
+                    </form>
+                </div>
+            </div>
+        )
+    }
+
+    get renderRoomsInput() {
+        const roomsCount = ['1', '2', '3'];
+
+        return roomsCount.map((item) => {
+            const checked = this.state.params.rooms_count && this.state.params.rooms_count.includes(item);
+
+            return (
+                <fieldset key={`rooms-${item}`} className={cx('home__fieldset', 'home__fieldset_checkbox')}>
+                    <div className={cx('home__checkbox-wrapper')}>
+                        <input
+                            type="checkbox"
+                            name={`rooms_count`}
+                            value={item}
+                            id={`rooms-count-${item}`}
+                            className={cx('home__checkbox-input')}
+                            onChange={this.onChangeRooms}
+                            checked={checked || false}
+                        />
+                        <label htmlFor={`rooms-count-${item}`} className={cx('home__checkbox-label')}>
+                            {`${item}-комнатная квартира`}
+                        </label>
+                    </div>
+                </fieldset>
+            )
+        });
+    }
 
     render() {
         return (
             <div className={cx('home')}>
-                <div className={cx('home__wrapper')}>
-                    <div className={cx('home__header')}>
-                        <div className={cx('home__wrapper', 'home__wrapper_header')}>
-                            <img src="https://steamstore-a.akamaihd.net/public/shared/images/header/globalheader_logo.png?t=962016" className={cx('home__image')} />
-                            <h1 className={cx('home__heading')}>Steam API Service</h1>
+                <div className={cx('home__header')}>
+                    <div className={cx('home__header-inner')}>
+                        <div className={cx('home__image')} />
+                    </div>
+                </div>
+                {this.elControls}
+                <div className={cx('home__result-block')}>
+                    <div className={cx('home__wrapper')}>
+                        <div className={cx('home__form-wrapper')}>
+                            {this.elPending}
+                            {this.elError}
                         </div>
+                        {this.elRoomList}
                     </div>
-                    <div className={cx('home__form-wrapper')}>
-                        <h2 className={cx('home__form-heading')}>Request Multiplayer games</h2>
-                        <p className={cx('home__text')}>On this page you can check two players to have the same multiplayer games on Steam. Test:
-                            <strong> thiopentalum</strong>
-                            <strong> Tryr</strong>
-                        </p>
-                        <form className={cx('home__form')} onSubmit={this.onSubmit}>
-                            {this.renderElInputs()}
-                            {this.renderElError()}
-                            {this.renderElButton()}
-                        </form>
-                    </div>
-                    {this.renderElGameList()}
                 </div>
             </div>
         )
@@ -409,6 +377,16 @@ class Home extends Component {
 }
 
 export default {
-    path  : '/',
-    action: () => Home
+    path   : '/',
+    action : () => Home,
+    fetcher: [{
+        promise: ({ location, helpers: { store: { dispatch } } }) => {
+            const fetchUrl = `http://localhost:18080/data${location.search}`;
+
+            return fetch(fetchUrl)
+                .then((result) => result.ok && result.json())
+                .then((data) => dispatch(roomsToStore(data)))
+                .catch((error) => dispatch(roomsError(error.message)))
+        }
+    }]
 }

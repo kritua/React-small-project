@@ -8,7 +8,8 @@ const Icon = ({ className, onClick }) => (
     </svg>
 );
 
-Icon.displayName = '[lib-ui__icons] search';
+Icon.displayName = 'search-icon';
+
 Icon.propTypes = {
     className: PropTypes.string,
     onClick  : PropTypes.func

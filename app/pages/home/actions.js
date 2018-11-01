@@ -1,10 +1,9 @@
 import { createAction } from 'redux-actions-helpers';
 
-export const gamesToStore = createAction('GAMES_TO_STORE', (payload) => ({ payload }));
-
-export const errorToStore = createAction('ERROR_TO_STORE', (payload) => ({ payload }));
+export const roomsToStore = createAction('ROOMS_TO_STORE', (payload) => ({ payload }));
+export const roomsError = createAction('ERRORS_TO_STORE', (payload) => ({ payload }));
 
 export default {
-    gamesToStore,
-    errorToStore
+    roomsToStore,
+    roomsError
 }
