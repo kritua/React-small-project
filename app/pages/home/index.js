@@ -60,17 +60,11 @@ class Home extends Component {
 
     componentDidMount() {
         this.$scrollContainer.addEventListener('scroll', this.onScrollThrottled);
-        setTimeout(this.calculateSize, 0);
+        setTimeout(this.calculateSize, 500);
     }
 
     componentWillUnmount() {
         this.$scrollContainer.removeEventListener('scroll', this.onScrollThrottled);
-    }
-
-    componentWillReceiveProps(nextProps) {
-        if(nextProps.rooms) {
-            this.addMoreItems()
-        }
     }
 
     addMoreItems = (props = this.props) => {
@@ -102,7 +96,7 @@ class Home extends Component {
         this.scroll = scrollPosition;
     };
 
-    onScrollThrottled = throttle(this.onScroll, 30);
+    onScrollThrottled = throttle(this.onScroll, 100);
 
     calculateSize = () => {
         const scrollHeight = this.$scrollContainer && (window.innerHeight - this.$scrollContainer.offsetTop);
@@ -149,11 +143,12 @@ class Home extends Component {
 
     onChange = (e) => {
         const { name, value } = e.target;
+        const replaced = value.replace(/\D/, '');
 
         this.setState({
             params: {
                 ...this.state.params,
-                [name]: value
+                [name]: replaced
             }
         }, this.onSubmit)
     };
@@ -351,9 +346,10 @@ class Home extends Component {
                         value={minValue}
                         onChange={this.onChange}
                         name="price_gte"
-                        type="number"
+                        type="text"
                         className={cx('home__price-input')}
                         placeholder="Минимальная цена"
+                        pattern="\d"
                     />
                     <label className={cx('home__price-label')}>Минимальная цена</label>
                 </fieldset>
@@ -362,9 +358,10 @@ class Home extends Component {
                         value={maxValue}
                         onChange={this.onChange}
                         name="price_lte"
-                        type="number"
+                        type="text"
                         className={cx('home__price-input')}
                         placeholder="Максимальная цена"
+                        pattern="\d"
                     />
                     <label className={cx('home__price-label')}>Максимальная цена</label>
                 </fieldset>
@@ -376,7 +373,7 @@ class Home extends Component {
         const roomsCount = ['1', '2', '3'];
 
         return roomsCount.map((item) => {
-            const checked = this.state.params.rooms_count && this.state.params.rooms_count.includes(item);
+            const checked = this.state.params.rooms_count ? this.state.params.rooms_count.includes(item) : false;
 
             return (
                 <fieldset key={`rooms-${item}`} className={cx('home__fieldset', 'home__fieldset_checkbox')}>
@@ -388,7 +385,7 @@ class Home extends Component {
                             id={`rooms-count-${item}`}
                             className={cx('home__checkbox-input')}
                             onChange={this.onChangeRooms}
-                            checked={checked || false}
+                            checked={checked}
                         />
                         <label htmlFor={`rooms-count-${item}`} className={cx('home__checkbox-label')}>
                             {`${item}-комнатная квартира`}
