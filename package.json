@@ -5,7 +5,7 @@
     "license": "UNLICENSED",
     "main": "server/index.js",
     "scripts": {
-        "build:dev": "concurrently -c \"blue,green\" -p [{name}] -n \"client,server\" \"yarn build:dev:client\" \"yarn build:dev:server\"",
+        "build:dev": "concurrently -c \"blue,green\" -p [{name}] -n \"client,server\" \"npm run build:dev:client\" \"npm run build:dev:server\"",
         "build:dev:client": "NODE_ENV=development DEBUG=app:*,booker-ui:* DEBUG_COLORS=true PORT=4001 webpack --config=webpack",
         "build:dev:server": "NODE_ENV=development DEBUG=app:*,booker-ui:* DEBUG_COLORS=true PORT=4001 webpack --env.server --config=webpack",
         "start:dev": "DISABLE_CLUSTERIZE=true DEBUG=app:*,booker-ui:* DEBUG_COLORS=true NODE_ENV=development PORT=4001 node --trace-warnings `pwd`/server/build/index.js",

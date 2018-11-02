@@ -7,7 +7,7 @@ const config = {
     development : [
         ...common,
         new DaemonCommandPlugin('start:dev', {
-            manager: 'yarn',
+            manager: 'npm',
             marker : true
         })
     ],
