@@ -63,6 +63,12 @@ class Home extends Component {
         setTimeout(this.calculateSize, 500);
     }
 
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.rooms) {
+            this.addMoreItems()
+        }
+    }
+
     componentWillUnmount() {
         this.$scrollContainer.removeEventListener('scroll', this.onScrollThrottled);
     }
