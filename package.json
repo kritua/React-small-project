@@ -11,8 +11,8 @@
         "start:dev": "DISABLE_CLUSTERIZE=true DEBUG=app:*,booker-ui:* DEBUG_COLORS=true NODE_ENV=development PORT=4001 node --trace-warnings `pwd`/server/build/index.js",
         "start": "DEBUG=app:*,booker-ui:* DEBUG_COLORS=true NODE_ENV=production PORT=4001 node `pwd`/server/build/index.js",
         "development:client": "NODE_ENV=development DEBUG=app:*,booker-ui:* DEBUG_COLORS=true PORT=4001 webpack-dev-server --config=webpack --hot --inline --trace-deprecation",
-        "development:server": "yarn build:dev:server --watch",
-        "development": "concurrently -k -c \"blue,green\" -p [{name}] -n \"server,client\" \"yarn development:server\" \"yarn development:client\" \"json-server --watch db.json\"",
+        "development:server": "NODE_ENV=development DEBUG=app:*,booker-ui:* DEBUG_COLORS=true PORT=4001 webpack --env.server --config=webpack --watch",
+        "development": "concurrently -k -c \"blue,green\" -p [{name}] -n \"server,client\" \"npm run development:server\" \"npm run development:client\" \"json-server --watch db.json\"",
         "eslint": "eslint .",
         "eslint:fix": "eslint . --fix",
         "stylelint": "stylelint app/**/*.pcss"
