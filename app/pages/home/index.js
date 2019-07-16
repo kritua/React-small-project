@@ -43,8 +43,8 @@ class Home extends Component {
     constructor() {
         super(...arguments);
 
-        this.elementsCount = 30;
-        this.totalElems = 30;
+        this.elementsCount = 20;
+        this.totalElems = 10;
         this.scroll = 0;
         this.wrapperHeight = null;
 
