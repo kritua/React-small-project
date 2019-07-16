@@ -1,18 +1,18 @@
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter, Placeholder } from 'react-router-async';
 import { hookRedux } from 'hook-redux';
 import { hookFetcher } from 'hook-fetcher';
 import hookScroll from 'hook-scroll';
 import getRoutes from './routes';
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory } from 'history';
 import { createStore } from 'block/core';
 import Application from 'page/application';
 import errors from 'block/errors';
 
 const store = createStore(window.__data);
-const history = createHistory();
+const history = createBrowserHistory();
 const hooks = [
     hookFetcher({
         helpers: {
@@ -34,7 +34,7 @@ BrowserRouter.init({
     routes: getRoutes(store)
 })
     .then(({ routerProps, callback }) => {
-        render((
+        ReactDOM.render((
             <Provider store={store} key="provider">
                 <BrowserRouter {...routerProps}>
                     <Application>

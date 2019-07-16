@@ -50,8 +50,7 @@ const use = [{
                 ignoreFiles: resolve(global.webpack.context, 'blocks/bootstrap/**/*.css'),
                 configBasedir: global.webpack.context
             }),
-            require('postcss-nested'),
-            require('autoprefixer')({ browsers })
+            require('postcss-nested')
         ]
     }
 }];

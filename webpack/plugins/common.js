@@ -1,9 +1,7 @@
 const webpack               = require('webpack');
-const ThemePlugin           = require('theme-webpack-plugin');
 const ExtractTextPlugin     = require('extract-text-webpack-plugin');
 
 module.exports = [
-    new ThemePlugin(/((booker|lib|core)+-ui__[\w_-]+)\/?/g, ['betslip', 'mobile']),
     new webpack.DefinePlugin({
         __CLIENT__              : global.webpack.client,
         __SERVER__              : global.webpack.server,
